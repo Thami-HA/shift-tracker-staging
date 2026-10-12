@@ -1,0 +1,2062 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Shift Tracker</title>
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Shift Tracker">
+<meta name="theme-color" content="#111318">
+
+<link rel="manifest" href="./manifest.json">
+
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@700&family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ha-bg:             #111318;
+  --ha-card-bg:        #1c1c1e;
+  --ha-card-bg2:       #252529;
+  --ha-border:         rgba(255,255,255,0.06);
+  --ha-divider:        rgba(255,255,255,0.08);
+  --ha-text-primary:   #e1e1e1;
+  --ha-text-secondary: #9da0a8;
+  --ha-text-disabled:  #4a4c52;
+  --ha-accent:         #03a9f4;
+  --ha-accent-dim:     rgba(3,169,244,0.15);
+  --ha-radius:         12px;
+  --ha-radius-sm:      8px;
+
+  --shift-night:       #3d5afe;
+  --shift-night-bg:    rgba(61,90,254,0.12);
+  --shift-day:         #ff8f00;
+  --shift-day-bg:      rgba(255,143,0,0.12);
+  --shift-standby:     #00897B;
+  --shift-standby-bg:  rgba(0,137,123,0.12);
+  --shift-rest:        #43a047;
+  --shift-rest-bg:     rgba(67,160,71,0.12);
+  --shift-home:        #039be5;
+  --shift-home-bg:     rgba(3,155,229,0.12);
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { -webkit-text-size-adjust:100%; }
+
+body {
+  font-family: 'Roboto', sans-serif;
+  background: var(--ha-bg);
+  color: var(--ha-text-primary);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Onboarding ───────────────────────────────────────────── */
+.onboarding {
+  position: fixed;
+  inset: 0;
+  background: var(--ha-bg);
+  z-index: 500;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 24px;
+  animation: fadeIn 0.3s ease;
+}
+.onboarding.hidden { display: none; }
+
+.onboarding-icon { font-size: 52px; margin-bottom: 20px; }
+
+.onboarding-title {
+  font-size: 26px;
+  font-weight: 600;
+  color: var(--ha-text-primary);
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.onboarding-sub {
+  font-size: 14px;
+  color: var(--ha-text-secondary);
+  text-align: center;
+  margin-bottom: 40px;
+  line-height: 1.6;
+  max-width: 280px;
+}
+
+.onboarding-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ha-text-secondary);
+  margin-bottom: 12px;
+  align-self: flex-start;
+  width: 100%;
+}
+
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  width: 100%;
+  margin-bottom: 36px;
+}
+
+.team-btn {
+  background: var(--ha-card-bg);
+  border: 2px solid var(--ha-border);
+  border-radius: var(--ha-radius);
+  color: var(--ha-text-primary);
+  font-size: 24px;
+  font-weight: 700;
+  padding: 22px 0;
+  cursor: pointer;
+  transition: all 0.15s;
+  -webkit-tap-highlight-color: transparent;
+  text-align: center;
+}
+.team-btn.selected {
+  border-color: var(--ha-accent);
+  background: var(--ha-accent-dim);
+  color: var(--ha-accent);
+}
+.team-btn:active { transform: scale(0.94); }
+
+.onboarding-confirm-btn {
+  width: 100%;
+  padding: 16px;
+  border-radius: var(--ha-radius);
+  border: none;
+  background: var(--ha-accent);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  opacity: 0.3;
+  transition: opacity 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.onboarding-confirm-btn.ready { opacity: 1; }
+
+/* ── App ──────────────────────────────────────────────────── */
+.app {
+  max-width: 430px;
+  margin: 0 auto;
+  padding: 16px 14px 48px;
+}
+
+/* ── Header ───────────────────────────────────────────────── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 4px 16px;
+}
+
+.header-title {
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--ha-text-primary);
+}
+
+.header-sub {
+  font-size: 11px;
+  color: var(--ha-text-secondary);
+  margin-top: 1px;
+}
+
+.header-date {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ha-text-secondary);
+  text-align: right;
+  line-height: 1.6;
+}
+
+/* ── Hero ─────────────────────────────────────────────────── */
+.hero-card {
+  background: radial-gradient(circle at top left, rgba(255,255,255,0.05), transparent 60%), var(--ha-card-bg);
+  border-radius: var(--ha-radius);
+  border: 1px solid var(--ha-border);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.05);
+  margin-bottom: 14px;
+  overflow: hidden;
+}
+
+.hero-color-bar {
+  height: 3px;
+  width: 100%;
+  transition: background 0.4s ease;
+}
+
+.shift-Night    .hero-color-bar { background: #3d5afe; }
+.shift-Day      .hero-color-bar { background: #ff8f00; }
+.shift-Standby  .hero-color-bar { background: #00897B; }
+.shift-Rest     .hero-color-bar { background: #43a047; }
+.shift-Home     .hero-color-bar { background: #039be5; }
+
+.hero-body {
+  padding: 20px 20px 0;
+}
+
+.hero-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.hero-main { min-width: 0; }
+
+.hero-label {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ha-text-secondary);
+  margin-bottom: 4px;
+}
+
+.hero-status {
+  font-size: 42px;
+  font-weight: 300;
+  letter-spacing: -0.01em;
+  color: var(--ha-text-primary);
+  line-height: 1.1;
+  margin-bottom: 2px;
+}
+
+.hero-hours {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 12px;
+  color: var(--ha-text-secondary);
+  margin-top: 4px;
+  margin-bottom: 18px;
+  min-height: 16px;
+}
+
+.stats-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-top: 1px solid var(--ha-divider);
+}
+
+.stat-cell { padding: 14px 20px; }
+.stat-cell:first-child { border-right: 1px solid var(--ha-divider); }
+
+.stat-label {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ha-text-secondary);
+  margin-bottom: 4px;
+}
+
+.stat-value {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 20px;
+  font-weight: 400;
+  color: var(--ha-text-primary);
+}
+
+.stat-value.ticker { animation: tick 2s ease-in-out infinite; }
+@keyframes tick { 0%,100%{opacity:1} 50%{opacity:0.5} }
+
+/* ── Tabs ─────────────────────────────────────────────────── */
+.tabs {
+  display: flex;
+  margin-bottom: 12px;
+  background: var(--ha-card-bg);
+  border-radius: var(--ha-radius);
+  border: 1px solid var(--ha-border);
+  padding: 3px;
+}
+
+.tab {
+  flex: 1;
+  padding: 7px 4px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  border-radius: 9px;
+  border: none;
+  background: transparent;
+  color: var(--ha-text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.tab.active {
+  background: var(--ha-card-bg2);
+  color: var(--ha-accent);
+}
+
+/* ── Views ────────────────────────────────────────────────── */
+.week-view, .month-view, .search-view { display: none; }
+.week-view.active, .month-view.active, .search-view.active { display: block; }
+
+/* ── Week ─────────────────────────────────────────────────── */
+.week-scroll {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+}
+.week-scroll::-webkit-scrollbar { display: none; }
+
+.day-card {
+  flex: 0 0 84px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0)), var(--ha-card-bg);
+  border-radius: var(--ha-radius);
+  border: 1px solid var(--ha-border);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+  padding: 12px 8px 10px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+
+}
+
+.day-card.today { border-color: #03a9f4; }
+
+.day-card-top-bar {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+}
+.day-card-Night   .day-card-top-bar { background: #3d5afe; }
+.day-card-Day     .day-card-top-bar { background: #ff8f00; }
+.day-card-Standby .day-card-top-bar { background: #00897B; }
+.day-card-Rest    .day-card-top-bar { background: #43a047; }
+
+.day-dow {
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ha-text-secondary);
+  margin-bottom: 5px;
+}
+
+.day-num {
+  font-size: 24px;
+  font-weight: 300;
+  color: var(--ha-text-primary);
+  line-height: 1;
+  margin-bottom: 8px;
+}
+.day-card.today .day-num { color: #03a9f4; }
+
+.day-shift-chip {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 500;
+  margin-bottom: 5px;
+}
+.day-card-Night   .day-shift-chip { background: rgba(61,90,254,0.12);   color: #3d5afe; }
+.day-card-Day     .day-shift-chip { background: rgba(255,143,0,0.12);   color: #ff8f00; }
+.day-card-Standby .day-shift-chip { background: rgba(0,137,123,0.12);   color: #00897B; }
+.day-card-Rest    .day-shift-chip { background: rgba(67,160,71,0.12);   color: #43a047; }
+
+.day-hours {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 8px;
+  color: var(--ha-text-secondary);
+  line-height: 1.4;
+}
+
+.today-label {
+  display: inline-block;
+  margin-top: 5px;
+  background: var(--ha-accent-dim);
+  color: var(--ha-accent);
+  border-radius: 20px;
+  padding: 1px 6px;
+  font-size: 8px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* ── Month ────────────────────────────────────────────────── */
+.month-nav-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding: 0 2px;
+}
+
+.month-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ha-text-primary);
+}
+
+.nav-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: var(--ha-radius-sm);
+  border: 1px solid var(--ha-border);
+  background: var(--ha-card-bg);
+  color: var(--ha-text-secondary);
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.nav-btn:hover  { background: var(--ha-card-bg2); }
+.nav-btn:active { opacity: 0.7; }
+
+.cal-wrap {
+  background: var(--ha-card-bg);
+  border-radius: var(--ha-radius);
+  border: 1px solid var(--ha-border);
+  overflow: hidden;
+}
+
+.cal-dow-row {
+  display: grid;
+  grid-template-columns: repeat(7,1fr);
+  border-bottom: 1px solid var(--ha-divider);
+}
+
+.cal-dow {
+  text-align: center;
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ha-text-secondary);
+  padding: 8px 0;
+}
+
+.cal-grid { display: grid; grid-template-columns: repeat(7,1fr); }
+
+.cal-cell {
+  border-right: 1px solid var(--ha-divider);
+  border-bottom: 1px solid var(--ha-divider);
+  min-height: 50px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 4px 2px;
+  position: relative;
+}
+.cal-cell:nth-child(7n) { border-right: none; }
+.cal-cell-empty   { background: transparent; }
+.cal-cell-Night   { background: rgba(61,90,254,0.12); }
+.cal-cell-Day     { background: rgba(255,143,0,0.12); }
+.cal-cell-Standby { background: rgba(0,137,123,0.12); }
+.cal-cell-Rest    { background: rgba(67,160,71,0.12); }
+
+.cal-num {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--ha-text-primary);
+  line-height: 1;
+}
+.cal-cell.is-today {
+  border: 1.5px solid #03a9f4;
+}
+.cal-cell.is-today .cal-num {
+  color: #03a9f4;
+  font-weight: 500;
+}
+
+.cal-shift-label {
+  font-size: 7px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.cal-cell-Night   .cal-shift-label { color: #3d5afe; }
+.cal-cell-Day     .cal-shift-label { color: #ff8f00; }
+.cal-cell-Standby .cal-shift-label { color: #00897B; }
+.cal-cell-Rest    .cal-shift-label { color: #43a047; }
+
+.legend {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+  padding: 0 2px;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  color: var(--ha-text-secondary);
+}
+.legend-dot { width: 6px; height: 6px; border-radius: 50%; }
+
+/* ── Search ───────────────────────────────────────────────── */
+.search-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ha-text-secondary);
+  margin-bottom: 8px;
+  padding: 0 2px;
+}
+
+.date-picker {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: var(--ha-radius);
+  border: 1px solid var(--ha-border);
+  background: var(--ha-card-bg);
+  color: var(--ha-text-primary);
+  font-family: 'Roboto Mono', monospace;
+  font-size: 13px;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s;
+  -webkit-appearance: none;
+  appearance: none;
+  margin-bottom: 12px;
+}
+.date-picker:focus { border-color: var(--ha-accent); }
+
+.result-card {
+  background: var(--ha-card-bg);
+  border-radius: var(--ha-radius);
+  border: 1px solid var(--ha-border);
+  overflow: hidden;
+  animation: fadeIn 0.3s ease;
+}
+.result-color-bar { height: 3px; }
+.result-Night   .result-color-bar { background: #3d5afe; }
+.result-Day     .result-color-bar { background: #ff8f00; }
+.result-Standby .result-color-bar { background: #00897B; }
+.result-Rest    .result-color-bar { background: #43a047; }
+
+.result-body { padding: 20px; }
+.result-date-str {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ha-text-secondary);
+  margin-bottom: 6px;
+}
+.result-shift-name {
+  font-size: 36px;
+  font-weight: 300;
+  color: var(--ha-text-primary);
+  letter-spacing: -0.01em;
+  margin-bottom: 12px;
+}
+.result-divider { height: 1px; background: var(--ha-divider); margin-bottom: 12px; }
+.result-meta { display: flex; align-items: center; justify-content: space-between; }
+.result-meta-label { font-size: 11px; color: var(--ha-text-secondary); }
+.result-meta-value { font-family: 'Roboto Mono', monospace; font-size: 12px; color: var(--ha-text-primary); }
+.result-card.is-ph { border: 1px solid rgba(255,193,7,0.5); box-shadow: 0 0 14px rgba(255,193,7,0.07); }
+.result-ph-row { display: flex; align-items: center; gap: 6px; margin-top: 10px; font-size: 12px; color: #FFC107; }
+
+/* ── Change team pill ─────────────────────────────────────── */
+.change-team-btn {
+  padding: 5px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--ha-border);
+  background: var(--ha-card-bg2);
+  color: var(--ha-text-secondary);
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s;
+}
+.change-team-btn:active { background: var(--ha-border); }
+
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+
+/* ── Public Holiday Panel ─────────────────────────────────── */
+.ph-panel { margin-top: 12px; }
+.ph-panel-title {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
+  text-transform: uppercase; color: #9da0a8;
+  margin-bottom: 8px; padding: 0 2px;
+}
+.ph-card {
+  background: #1c1c1e; border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.06);
+  overflow: hidden; margin-bottom: 8px;
+  display: flex; align-items: stretch;
+}
+.ph-card-accent { width: 3px; background: #FFC107; flex-shrink: 0; }
+.ph-card-body {
+  padding: 12px 14px; flex: 1;
+  display: flex; align-items: center;
+  justify-content: space-between; gap: 8px;
+}
+.ph-card-name { font-size: 13px; font-weight: 500; color: #e1e1e1; margin-bottom: 2px; }
+.ph-card-date { font-size: 11px; color: #9da0a8; }
+.ph-observed-tag {
+  font-size: 9px; background: rgba(255,193,7,0.15); color: #FFC107;
+  border-radius: 3px; padding: 1px 4px; margin-left: 4px;
+  font-weight: 500; letter-spacing: 0.03em; text-transform: uppercase;
+}
+.ph-card-right { text-align: right; flex-shrink: 0; }
+.ph-hours-val {
+  font-family: 'Roboto Mono', monospace; font-size: 18px;
+  font-weight: 400; color: #e1e1e1; line-height: 1; margin-bottom: 2px;
+}
+.ph-hours-val.zero { color: #4a4c52; }
+.ph-hours-detail { font-size: 9px; color: #9da0a8; }
+.ph-shift-chip {
+  display: inline-block; padding: 1px 6px; border-radius: 20px;
+  font-size: 9px; font-weight: 500; margin-bottom: 3px;
+}
+.ph-empty {
+  font-size: 12px; color: #9da0a8; text-align: center;
+  padding: 16px; background: #1c1c1e;
+  border-radius: 12px; border: 1px solid rgba(255,255,255,0.06);
+}
+/* Month PH Option B+C */
+.ph-cell-dot {
+  position: absolute; top: 3px; right: 3px;
+  width: 5px; height: 5px; border-radius: 50%; background: #FFC107;
+}
+
+/* ── Week card PH (B+C) ───────────────────────────────────── */
+
+.ph-card-dot {
+  position: absolute; top: 6px; right: 6px;
+  width: 6px; height: 6px; border-radius: 50%; background: #FFC107;
+}
+
+/* ══════════ v2 upgrade: depth, motion, icons, leave ══════════ */
+:root { --shift-leave:#ab47bc; --shift-leave-bg:rgba(171,71,188,0.15); --leave-soft:#ce93d8; }
+.ico { display:inline-block; vertical-align:-2px; flex-shrink:0; }
+@keyframes riseIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:none; } }
+@keyframes viewIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
+@keyframes cellIn { from { opacity:0; transform:scale(.92); } to { opacity:1; transform:none; } }
+@keyframes slideL { from { opacity:0; transform:translateX(26px); } to { opacity:1; transform:none; } }
+@keyframes slideR { from { opacity:0; transform:translateX(-26px); } to { opacity:1; transform:none; } }
+@keyframes popIn { 0% { transform:scale(.82); } 100% { transform:scale(1); } }
+@keyframes iconFloat { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-1.5px); } }
+
+/* Hero depth + tilt */
+.hero-card {
+  position:relative; transform-style:preserve-3d; will-change:transform;
+  transition:transform .25s ease-out, box-shadow .4s ease;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 2px 4px rgba(0,0,0,.3), 0 12px 28px rgba(0,0,0,.45), 0 30px 60px -24px rgba(0,0,0,.6);
+  animation: riseIn .5s cubic-bezier(.2,.8,.2,1) backwards;
+}
+.hero-card::after {
+  content:''; position:absolute; inset:0; pointer-events:none; border-radius:inherit;
+  background: radial-gradient(circle at var(--gx,18%) var(--gy,0%), rgba(255,255,255,.07), transparent 55%);
+}
+.shift-Night .hero-card   { box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 12px 28px rgba(0,0,0,.45), 0 14px 44px -14px rgba(61,90,254,.4); }
+.shift-Day .hero-card     { box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 12px 28px rgba(0,0,0,.45), 0 14px 44px -14px rgba(255,143,0,.35); }
+.shift-Standby .hero-card { box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 12px 28px rgba(0,0,0,.45), 0 14px 44px -14px rgba(0,137,123,.4); }
+.shift-Rest .hero-card    { box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 12px 28px rgba(0,0,0,.45), 0 14px 44px -14px rgba(67,160,71,.35); }
+.shift-Home .hero-card    { box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 12px 28px rgba(0,0,0,.45), 0 14px 44px -14px rgba(3,155,229,.35); }
+.shift-Leave .hero-card   { box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 12px 28px rgba(0,0,0,.45), 0 14px 44px -14px rgba(171,71,188,.45); }
+.shift-Leave .hero-color-bar { background:#ab47bc; }
+
+.hero-label { display:flex; align-items:center; gap:8px; }
+.hero-icon {
+  width:26px; height:26px; border-radius:8px; display:inline-flex; align-items:center; justify-content:center;
+  background:rgba(255,255,255,.06); color:var(--ha-text-primary);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 2px 6px rgba(0,0,0,.35);
+  transition: background .4s, color .4s;
+}
+.hero-icon svg { animation: iconFloat 4s ease-in-out infinite; }
+.shift-Night .hero-icon   { color:#6d82ff; background:rgba(61,90,254,.16); }
+.shift-Day .hero-icon     { color:#ffa726; background:rgba(255,143,0,.16); }
+.shift-Standby .hero-icon { color:#26a69a; background:rgba(0,137,123,.18); }
+.shift-Rest .hero-icon    { color:#66bb6a; background:rgba(67,160,71,.16); }
+.shift-Home .hero-icon    { color:#29b6f6; background:rgba(3,155,229,.16); }
+.shift-Leave .hero-icon   { color:var(--leave-soft); background:var(--shift-leave-bg); }
+
+/* Weather icons */
+.weather-widget { z-index:2; }
+.weather-widget.loaded { animation: fadeIn .45s ease; }
+.weather-icon { display:inline-flex; line-height:1; }
+.weather-humidity { display:flex; align-items:center; justify-content:flex-end; gap:4px; }
+.weather-wind { justify-content:flex-end; }
+.weather-humidity .ico { color:#4fc3f7; }
+.wind-arrow { display:inline-flex; color:#80cbc4; }
+.w-sun { color:#ffb300; } .w-moon { color:#9fa8da; } .w-partly { color:#ffca28; }
+.w-cloud { color:#b0bec5; } .w-rain { color:#4fc3f7; } .w-storm { color:#ffca28; } .w-fog { color:#90a4ae; }
+
+/* Tabs + view transitions */
+.tabs { box-shadow: inset 0 1px 3px rgba(0,0,0,.4), 0 1px 0 rgba(255,255,255,.03); }
+.tab { transition: background .25s, color .25s, box-shadow .25s; }
+.tab.active { box-shadow: 0 2px 8px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.06); }
+.week-view.active, .month-view.active, .search-view.active, .port-view.active { animation: viewIn .32s ease backwards; }
+
+/* Week cards */
+.day-card {
+  transition: transform .2s ease, box-shadow .2s ease;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.04), 0 4px 10px rgba(0,0,0,.35), 0 12px 22px -12px rgba(0,0,0,.5);
+  animation: riseIn .45s cubic-bezier(.2,.8,.2,1) backwards;
+}
+.day-card:active { transform: translateY(1px) scale(.97); }
+.day-card.today { box-shadow: 0 0 0 1px rgba(3,169,244,.25), 0 10px 26px -10px rgba(3,169,244,.5); }
+.day-shift-chip { display:inline-flex; align-items:center; gap:4px; }
+.day-card.on-leave .day-card-top-bar { background:#ab47bc !important; }
+.day-card.on-leave .day-shift-chip { background:var(--shift-leave-bg) !important; color:var(--leave-soft) !important; }
+
+/* Calendar */
+.nav-btn { box-shadow: 0 2px 6px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.05); }
+.cal-wrap {
+  transition: box-shadow .3s ease;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.04), 0 6px 16px rgba(0,0,0,.4), 0 20px 40px -24px rgba(0,0,0,.6);
+}
+.cal-grid.anim-in .cal-cell { animation: cellIn .3s ease backwards; animation-delay: calc(var(--i, 0) * 8ms); }
+.cal-grid.anim-left  { animation: slideL .3s cubic-bezier(.2,.8,.2,1); }
+.cal-grid.anim-right { animation: slideR .3s cubic-bezier(.2,.8,.2,1); }
+.cal-cell { transition: background .2s; }
+.cal-cell.is-leave {
+  background: repeating-linear-gradient(135deg, rgba(171,71,188,.30) 0 6px, rgba(171,71,188,.17) 6px 12px) !important;
+  box-shadow: inset 0 0 0 1.5px rgba(186,104,200,.75);
+}
+.cal-cell.is-leave .cal-shift-label { color:#f3e5f5 !important; }
+.cal-cell.is-leave-free { outline: 1.5px dashed rgba(186,104,200,.6); outline-offset:-4px; }
+.cal-cell.just-toggled { animation: popIn .3s cubic-bezier(.3,1.6,.5,1); }
+.cal-wrap.leave-mode { box-shadow: 0 0 0 1.5px rgba(186,104,200,.55), 0 12px 32px -10px rgba(171,71,188,.45); }
+.cal-wrap.leave-mode .cal-cell:not(.cal-cell-empty) { cursor:pointer; -webkit-tap-highlight-color:transparent; }
+.cal-wrap.leave-mode .cal-cell:not(.cal-cell-empty):active { transform: scale(.94); }
+.legend-leave { background: repeating-linear-gradient(135deg, #ab47bc 0 2px, rgba(171,71,188,.4) 2px 4px); border-radius:2px !important; width:8px !important; height:8px !important; }
+
+/* Leave planner */
+.leave-bar { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px; min-height:34px; }
+.leave-toggle {
+  display:inline-flex; align-items:center; gap:6px; padding:7px 14px; border-radius:20px;
+  border:1px solid rgba(186,104,200,.35); background:rgba(171,71,188,.1); color:var(--leave-soft);
+  font: 500 12px 'Roboto', sans-serif; cursor:pointer; -webkit-tap-highlight-color:transparent;
+  box-shadow: 0 2px 6px rgba(0,0,0,.3); transition: all .2s ease;
+}
+.leave-toggle.active { background:#ab47bc; color:#fff; border-color:#ab47bc; box-shadow:0 4px 16px -2px rgba(171,71,188,.6); }
+.leave-toggle:active { transform: scale(.96); }
+.leave-hint { font-size:11px; color:var(--leave-soft); opacity:0; transform:translateX(6px); transition: all .25s ease; text-align:right; }
+.leave-hint.show { opacity:1; transform:none; }
+.section-title {
+  display:flex; align-items:center; justify-content:space-between;
+  font-size:11px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:#9da0a8;
+  margin:18px 2px 8px;
+}
+.section-title > span { display:inline-flex; align-items:center; gap:6px; }
+.text-btn { background:none; border:none; color:var(--leave-soft); font: 500 11px 'Roboto', sans-serif; letter-spacing:.06em; text-transform:uppercase; cursor:pointer; padding:4px 2px; }
+.leave-card {
+  background: linear-gradient(180deg, rgba(171,71,188,.09), rgba(171,71,188,0) 70%), var(--ha-card-bg);
+  border:1px solid rgba(186,104,200,.22); border-radius:12px; overflow:hidden;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.04), 0 6px 16px rgba(0,0,0,.4);
+  animation: riseIn .4s ease backwards;
+}
+.leave-stats { display:grid; grid-template-columns:1fr 1fr; }
+.ls { padding:14px 16px; }
+.ls:first-child { border-right:1px solid var(--ha-divider); }
+.ls-val { font-family:'Roboto Mono', monospace; font-size:24px; color:#e1bee7; line-height:1; }
+.ls-lbl { font-size:10px; letter-spacing:.06em; text-transform:uppercase; color:var(--ha-text-secondary); margin-top:6px; }
+.leave-range { display:flex; justify-content:space-between; align-items:center; gap:10px; padding:11px 16px; border-top:1px solid var(--ha-divider); }
+.lr-dates { font-size:13px; color:var(--ha-text-primary); }
+.lr-meta { font-size:11px; color:var(--leave-soft); font-family:'Roboto Mono', monospace; white-space:nowrap; }
+.leave-empty { font-size:12px; line-height:1.55; color:var(--ha-text-secondary); padding:14px 16px; background:var(--ha-card-bg); border:1px dashed rgba(186,104,200,.3); border-radius:12px; }
+.leave-empty b { color:var(--leave-soft); font-weight:500; }
+
+/* Holiday cards */
+.ph-card { box-shadow: inset 0 1px 0 rgba(255,255,255,.04), 0 4px 12px rgba(0,0,0,.35); animation: riseIn .4s ease backwards; }
+.ph-shift-chip { display:inline-flex; align-items:center; gap:4px; }
+.ph-hours-val.leave { color:var(--leave-soft); font-size:16px; }
+
+
+
+/* Hero weather badge */
+.weather-badge { flex-shrink:0; display:flex; flex-direction:column; align-items:flex-end; gap:5px; padding-top:2px; position:relative; z-index:2; }
+.wb-loc { font-size:8.5px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--ha-text-secondary); white-space:nowrap; }
+.wb-top { display:flex; align-items:center; gap:6px; }
+.wb-icon { display:inline-flex; }
+.wb-temp { font-family:'Roboto Mono', monospace; font-size:18px; font-weight:500; color:var(--ha-text-primary); line-height:1; }
+.wb-row { display:flex; align-items:center; justify-content:flex-end; gap:5px; font-family:'Roboto Mono', monospace; font-size:12px; color:var(--ha-text-secondary); white-space:nowrap; min-height:14px; }
+.wb-row .wb-drop { color:#4fc3f7; display:inline-flex; }
+.wb-row .wb-arrow { color:#80cbc4; display:inline-flex; transition: transform .6s ease; }
+.weather-badge.loaded { animation: fadeIn .45s ease; }
+
+/* Port tab: live vessel map */
+.port-map-card {
+  border-radius:12px; overflow:hidden; border:1px solid rgba(79,195,247,.18);
+  background: linear-gradient(180deg, rgba(79,195,247,.06), rgba(79,195,247,0)), var(--ha-card-bg);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 6px 16px rgba(0,0,0,.4), 0 18px 40px -20px rgba(3,169,244,.35);
+  animation: riseIn .4s ease backwards;
+}
+.port-map-head { display:flex; align-items:center; gap:10px; padding:14px 16px 12px; }
+.port-map-head .pm-icon { width:32px; height:32px; border-radius:9px; display:flex; align-items:center; justify-content:center; color:#4fc3f7; background:rgba(79,195,247,.14); }
+.port-map-wrap { position:relative; height:62vh; min-height:360px; max-height:620px; background:#0d1b26; border-top:1px solid var(--ha-divider); }
+.port-map-wrap { overflow:hidden; }
+/* MarineTraffic's own bottom bar (site name + iOS/Android links) is pushed out of view */
+.port-map-wrap iframe { position:absolute; top:0; left:0; width:100%; height:calc(100% + 38px); border:0; }
+.port-map-loading { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:12px; color:var(--ha-text-secondary); pointer-events:none; animation: tick 1.6s ease-in-out infinite; }
+.port-map-loading.hide { display:none; }
+/* Locked map: a clear layer on top stops dragging and zooming */
+.port-map-lock { position:absolute; inset:0; z-index:2; cursor:default; -webkit-tap-highlight-color:transparent; }
+.port-cta.nudge { animation: ctaNudge .6s cubic-bezier(.3,1.6,.5,1); }
+@keyframes ctaNudge { 0%,100% { transform:scale(1); } 40% { transform:scale(1.05); box-shadow:0 6px 22px -2px rgba(3,169,244,.7); } }
+
+
+/* Header: option B */
+.header { padding:6px 4px 18px; }
+.header-left { min-width:0; }
+.header-date { font-size:11px; font-weight:500; letter-spacing:.1em; text-transform:uppercase; color:#7d808a; text-align:left; line-height:1.2; }
+.header-title { font-family:'Manrope', 'Roboto', sans-serif; font-weight:700; font-size:23px; letter-spacing:-.01em; color:#ececec; margin-top:4px; line-height:1.15; }
+.team-badge-btn { display:flex; flex-direction:column; align-items:center; gap:4px; background:none; border:none; padding:0; cursor:pointer; -webkit-tap-highlight-color:transparent; flex-shrink:0; }
+.team-badge {
+  width:42px; height:42px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  background:var(--ha-card-bg); border:2px solid #03a9f4; color:#ececec;
+  font-family:'Manrope', 'Roboto', sans-serif; font-weight:700; font-size:18px;
+  box-shadow: 0 4px 14px -4px rgba(3,169,244,.55), inset 0 1px 0 rgba(255,255,255,.06);
+  transition: transform .15s ease;
+}
+.team-badge-btn:active .team-badge { transform:scale(.92); }
+.team-badge-lbl { font-size:11px; color:#7d808a; }
+
+/* Team switch sheet */
+.team-sheet-overlay { position:fixed; inset:0; background:rgba(0,0,0,.55); display:none; align-items:flex-end; justify-content:center; z-index:400; }
+.team-sheet-overlay.open { display:flex; animation: fadeIn .2s ease; }
+.team-sheet {
+  width:100%; max-width:430px; background:var(--ha-card-bg); border:1px solid var(--ha-border); border-bottom:none;
+  border-radius:20px 20px 0 0; padding:10px 18px max(env(safe-area-inset-bottom, 0px), 22px);
+  box-shadow: 0 -10px 40px rgba(0,0,0,.5); animation: tsSlideUp .25s cubic-bezier(.2,.8,.2,1);
+}
+@keyframes tsSlideUp { from { transform:translateY(40px); opacity:0; } to { transform:none; opacity:1; } }
+.ts-handle { width:36px; height:4px; border-radius:2px; background:rgba(255,255,255,.12); margin:0 auto 14px; }
+.ts-title { font-size:13px; font-weight:500; color:var(--ha-text-secondary); text-align:center; margin-bottom:14px; }
+.ts-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+.ts-btn {
+  padding:18px 0; border-radius:12px; border:2px solid var(--ha-border); background:var(--ha-card-bg2);
+  color:var(--ha-text-primary); font-family:'Manrope', 'Roboto', sans-serif; font-weight:700; font-size:22px;
+  cursor:pointer; -webkit-tap-highlight-color:transparent; transition: all .15s ease;
+}
+.ts-btn.current { border-color:#03a9f4; background:var(--ha-accent-dim); color:#4fc3f7; }
+.ts-btn:active { transform:scale(.94); }
+
+/* Leave card: rows only, purple fade across the card */
+.leave-card { background: linear-gradient(180deg, rgba(171,71,188,.14), rgba(171,71,188,.02) 100%), var(--ha-card-bg); }
+.leave-card .leave-range:first-child { border-top:none; }
+
+/* Leave edit mode: clear button + hint */
+.leave-bar { margin-bottom:8px; justify-content:center; gap:10px; }
+.leave-clear {
+  display:none; align-items:center; gap:6px; padding:7px 14px; border-radius:20px;
+  border:1px solid rgba(239,83,80,.35); background:rgba(239,83,80,.08); color:#ef9a9a;
+  font: 500 12px 'Roboto', sans-serif; cursor:pointer; -webkit-tap-highlight-color:transparent;
+  transition: background .2s, color .2s, border-color .2s, transform .15s;
+}
+.leave-clear.show { display:inline-flex; animation: fadeIn .2s ease; }
+.leave-clear.armed { background:#e53935; border-color:#e53935; color:#fff; box-shadow:0 4px 14px -2px rgba(229,57,53,.55); }
+.leave-clear:active { transform:scale(.96); }
+.leave-hint { text-align:center; max-height:0; overflow:hidden; opacity:0; transform:none; margin:0 2px; transition: max-height .25s ease, opacity .25s ease, margin .25s ease; }
+.leave-hint.show { max-height:24px; opacity:1; margin:0 2px 10px; }
+
+/* Month calendar: no shift background colour, stronger grid lines, brighter labels */
+.cal-cell-Night, .cal-cell-Day, .cal-cell-Standby, .cal-cell-Rest { background: transparent; }
+.cal-cell { border-right-color: rgba(255,255,255,.13); border-bottom-color: rgba(255,255,255,.13); }
+.cal-dow-row { border-bottom-color: rgba(255,255,255,.13); }
+.cal-cell-Night   .cal-shift-label { color:#6d82ff; }
+.cal-cell-Standby .cal-shift-label { color:#26a69a; }
+
+/* Port header: text centred across the card, anchor kept on the left */
+.port-map-head { position:relative; justify-content:center; text-align:center; min-height:60px; }
+.port-map-head .pm-icon { position:absolute; left:16px; top:50%; margin-top:-16px; }
+
+/* Search date box: whole box opens the calendar, dark-mode picker, visible blue icon */
+.date-wrap { position:relative; margin-bottom:12px; }
+.date-picker { color-scheme: dark; margin-bottom:0; padding-right:52px; position:relative; min-height:48px; }
+.date-picker::-webkit-calendar-picker-indicator { position:absolute; inset:0; width:auto; height:auto; opacity:0; cursor:pointer; }
+.date-icon { position:absolute; right:16px; top:50%; transform:translateY(-50%); color:#03a9f4; pointer-events:none; }
+.date-wrap:active .date-icon { transform:translateY(-50%) scale(.9); }
+
+/* Hero: quiet "on duty now" line */
+.hero-hours { margin-bottom: 6px; }
+.hero-duty { font-size:11px; letter-spacing:.04em; color:#7d808a; margin-bottom:16px; min-height:14px; }
+.hero-duty b { color:#c5c7cc; font-weight:500; }
+/* Tomorrow card: larger plain shift icon, no background, no motion */
+#tomorrowVal { display:flex; align-items:center; gap:9px; }
+.tm-ic { display:inline-flex; flex-shrink:0; }
+.tm-ic svg { animation:none !important; }
+
+/* Off Duty house icon stays still */
+.hero-icon.off-duty svg { animation: none !important; }
+
+/* Welcome screen: tanker icon + company logo (top-left) */
+.onboarding-icon { font-size:0; margin-bottom:14px; display:flex; justify-content:center; }
+.brand-corner { position:absolute; top:max(env(safe-area-inset-top,0px),22px); left:22px; }
+.brand-corner img { display:block; height:34px; width:auto; }
+
+/* Port tab opens MarineTraffic directly */
+a.tab-link { display:block; text-decoration:none; }
+
+/* Port tab */
+.port-view { display:none; }
+.port-view.active { display:block; }
+.port-hero {
+  position:relative; overflow:hidden; border-radius:12px; padding:18px 18px 16px;
+  border:1px solid rgba(79,195,247,.18);
+  background: radial-gradient(circle at 88% 0%, rgba(79,195,247,.16), transparent 60%), linear-gradient(180deg, rgba(79,195,247,.06), rgba(79,195,247,0)), var(--ha-card-bg);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 6px 16px rgba(0,0,0,.4), 0 18px 40px -20px rgba(3,169,244,.35);
+  animation: riseIn .4s ease backwards;
+}
+.port-hero-top { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
+.port-title { font-size:16px; font-weight:500; color:var(--ha-text-primary); }
+.port-sub { font-size:11px; color:var(--ha-text-secondary); margin-top:2px; }
+.port-hero-icon { display:inline-flex; filter: drop-shadow(0 4px 10px rgba(0,0,0,.45)); }
+.port-hero-icon svg { animation: iconFloat 5s ease-in-out infinite; }
+.port-temp-row { display:flex; align-items:baseline; gap:10px; margin-top:4px; }
+.port-temp { font-size:48px; font-weight:300; line-height:1; color:var(--ha-text-primary); }
+.port-cond { font-size:14px; color:var(--ha-text-secondary); }
+.port-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+.port-tile {
+  background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,0)), var(--ha-card-bg);
+  border:1px solid var(--ha-border); border-radius:12px; padding:12px 10px 11px; min-width:0;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.04), 0 4px 10px rgba(0,0,0,.35);
+  animation: riseIn .4s ease backwards;
+}
+.port-grid .port-tile:nth-child(2) { animation-delay:.05s; }
+.port-grid .port-tile:nth-child(3) { animation-delay:.1s; }
+.pt-icon { width:30px; height:30px; border-radius:9px; display:flex; align-items:center; justify-content:center; margin-bottom:10px; }
+.pt-icon .ico { transition: transform .6s ease; }
+.pt-rain  { color:#4fc3f7; background:rgba(79,195,247,.12); }
+.pt-wind  { color:#80cbc4; background:rgba(128,203,196,.12); }
+.pt-hum   { color:#64b5f6; background:rgba(100,181,246,.12); }
+.pt-sea   { color:#ffb74d; background:rgba(255,183,77,.12); }
+.pt-wave  { color:#4dd0e1; background:rgba(77,208,225,.12); }
+.pt-swell { color:#9fa8da; background:rgba(121,134,203,.15); }
+.pt-val { font-family:'Roboto Mono', monospace; font-size:14px; color:var(--ha-text-primary); line-height:1.2; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.pt-lbl { font-size:9.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--ha-text-secondary); margin-top:4px; }
+.port-cta {
+  display:flex; align-items:center; justify-content:center; gap:8px; margin-top:16px; padding:13px 16px;
+  border-radius:14px; background:rgba(79,195,247,.14); border:1px solid rgba(79,195,247,.4);
+  color:#4fc3f7; font-size:14px; font-weight:600; text-decoration:none;
+  box-shadow: 0 4px 14px -4px rgba(3,169,244,.4); transition: transform .15s, background .15s;
+}
+.port-cta:active { transform:scale(.98); background:rgba(79,195,247,.22); }
+.port-updated { font-size:10px; color:var(--ha-text-secondary); text-align:center; padding:10px 0 4px; }
+
+
+/* M1 weather icon matches the weather */
+.wb-icon svg { transform-origin:center; }
+.wb-icon.w-sun svg { animation: mSpin 16s linear infinite; }
+.wb-icon.w-partly svg, .wb-icon.w-cloud svg { animation: mDrift 6s ease-in-out infinite; }
+.wb-icon.w-rain svg path:nth-child(2) { animation: mRain 1.1s linear infinite; }
+.wb-icon.w-storm svg path:nth-child(2) { animation: mFlash 5s linear infinite; }
+.wb-icon.w-fog svg { animation: mDrift 5s ease-in-out infinite; }
+.wb-icon.w-moon svg { animation: mGlow 4s ease-in-out infinite; }
+@keyframes mSpin { to { transform: rotate(360deg); } }
+@keyframes mDrift { 0%,100% { transform: translateX(-2px); } 50% { transform: translateX(2px); } }
+@keyframes mRain { 0% { transform: translateY(-2px); opacity:0; } 30% { opacity:1; } 100% { transform: translateY(3px); opacity:0; } }
+@keyframes mFlash { 0%,84%,100% { opacity:1; } 86% { opacity:.15; } 88% { opacity:1; } 90% { opacity:.3; } 92% { opacity:1; } }
+@keyframes mGlow { 0%,100% { opacity:1; filter: drop-shadow(0 0 0 rgba(159,168,218,0)); } 50% { opacity:.8; filter: drop-shadow(0 0 4px rgba(159,168,218,.7)); } }
+
+/* M2 wind arrow sways, faster in stronger wind */
+.wb-arrow svg { animation: mSway var(--sway-dur, 3s) ease-in-out infinite; transform-origin:center; }
+@keyframes mSway { 0%,100% { transform: rotate(-10deg); } 50% { transform: rotate(10deg); } }
+
+/* M3 humidity drop drips */
+.wb-drop svg { animation: mDrip 3s ease-in-out infinite; transform-origin: 50% 0; }
+@keyframes mDrip { 0%,60%,100% { transform: translateY(0) scaleY(1); } 75% { transform: translateY(1.5px) scaleY(1.08); } 85% { transform: translateY(0) scaleY(.96); } }
+
+/* M4 shift icon comes alive */
+.hero-icon svg { transform-origin:center; }
+.shift-Standby .hero-icon svg { animation: mRing 6s ease-in-out infinite; transform-origin: 50% 60%; }
+.shift-Night .hero-icon svg { animation: mRock 5s ease-in-out infinite; }
+.shift-Day .hero-icon svg { animation: mSpin 18s linear infinite; }
+@keyframes mRing { 0%,78%,100% { transform: rotate(0); } 81% { transform: rotate(-14deg); } 84% { transform: rotate(12deg); } 87% { transform: rotate(-10deg); } 90% { transform: rotate(7deg); } 93% { transform: rotate(-3deg); } }
+@keyframes mRock { 0%,100% { transform: rotate(-8deg); } 50% { transform: rotate(8deg); } }
+@keyframes mSpin { to { transform: rotate(360deg); } }
+
+/* M5 countdown digits slide in */
+#countdown.ticker { animation: none; }
+#countdown .cd-d { display:inline-block; }
+#countdown .cd-d.roll { animation: mDigit .35s cubic-bezier(.2,.8,.2,1); }
+@keyframes mDigit { from { transform: translateY(-55%); opacity:0; } to { transform:none; opacity:1; } }
+
+/* M7 team badge ring draws itself */
+.team-badge { position:relative; border-color: transparent !important; }
+.tb-ring { position:absolute; inset:-2px; width:42px; height:42px; transform: rotate(-90deg); pointer-events:none; }
+.tb-ring circle { fill:none; stroke:#03a9f4; stroke-width:2; stroke-linecap:round; stroke-dasharray:126; stroke-dashoffset:126; animation: mDraw 1s cubic-bezier(.4,0,.2,1) .3s forwards; }
+@keyframes mDraw { to { stroke-dashoffset:0; } }
+
+/* M8 today's card breathes */
+.day-card.today { animation: riseIn .45s cubic-bezier(.2,.8,.2,1) backwards, mBreathe 3.5s ease-in-out .6s infinite; }
+@keyframes mBreathe {
+  0%,100% { box-shadow: 0 0 0 1px rgba(3,169,244,.25), 0 10px 26px -10px rgba(3,169,244,.45); }
+  50% { box-shadow: 0 0 0 1px rgba(3,169,244,.5), 0 10px 30px -6px rgba(3,169,244,.75); }
+}
+
+/* M9 port anchor bobs */
+.pm-icon svg { animation: mBob 3.2s ease-in-out infinite; transform-origin: 50% 20%; }
+@keyframes mBob { 0%,100% { transform: translateY(0) rotate(-5deg); } 50% { transform: translateY(2px) rotate(5deg); } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation:none !important; transition:none !important; }
+}
+</style>
+</head>
+<body>
+
+<div class="onboarding" id="onboarding">
+  <div class="brand-corner"><img alt="Bidvest Tank Terminals" src="data:image/png;base64,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"></div>
+  <div class="onboarding-icon"><svg width="84" height="84" viewBox="0 0 80 80" aria-hidden="true" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="3">
+    <path d="M10 52 H64 L58 64 H16 Z" stroke="#4fc3f7"/><path d="M18 52 V44 H30 V52 M36 48 H56" stroke="#4fc3f7"/>
+    <circle cx="42" cy="48" r="2" fill="#4fc3f7" stroke="none"/><circle cx="50" cy="48" r="2" fill="#4fc3f7" stroke="none"/>
+    <path d="M66 24 V64 M66 30 H52 V44" stroke="#ececec"/><path d="M8 70 Q14 67 20 70 T32 70 T44 70 T56 70 T68 70" stroke="#4fc3f7" stroke-opacity=".5" stroke-width="2"/>
+  </svg></div>
+  <div class="onboarding-title">Shift Tracker</div>
+  <div class="onboarding-sub">Select your shift team to see your schedule.</div>
+  <div class="onboarding-label">Your Shift Team</div>
+  <div class="team-grid">
+    <button class="team-btn" onclick="selectTeam('A')">A</button>
+    <button class="team-btn" onclick="selectTeam('B')">B</button>
+    <button class="team-btn" onclick="selectTeam('C')">C</button>
+    <button class="team-btn" onclick="selectTeam('D')">D</button>
+  </div>
+  <button class="onboarding-confirm-btn" id="confirmBtn" onclick="confirmTeam()">Let's Go →</button>
+</div>
+
+<div class="app" id="app">
+
+  <div class="header">
+    <div class="header-left">
+      <div class="header-date" id="headerDate"></div>
+      <div class="header-title" id="headerTitle">Shift Tracker</div>
+    </div>
+    <button class="team-badge-btn" onclick="openTeamSheet()" aria-label="Change shift team">
+      <span class="team-badge"><svg class="tb-ring" viewBox="0 0 42 42" aria-hidden="true"><circle cx="21" cy="21" r="20"/></svg><span id="teamBadge">&ndash;</span></span>
+      <span class="team-badge-lbl">Change</span>
+    </button>
+  </div>
+
+  <div class="team-sheet-overlay" id="teamSheet" onclick="closeTeamSheet(event)">
+    <div class="team-sheet" onclick="event.stopPropagation()">
+      <div class="ts-handle"></div>
+      <div class="ts-title">Choose your shift team</div>
+      <div class="ts-grid">
+        <button class="ts-btn" data-team="A" onclick="switchTeam('A')">A</button>
+        <button class="ts-btn" data-team="B" onclick="switchTeam('B')">B</button>
+        <button class="ts-btn" data-team="C" onclick="switchTeam('C')">C</button>
+        <button class="ts-btn" data-team="D" onclick="switchTeam('D')">D</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-card" id="heroCard">
+    <div class="hero-color-bar"></div>
+    <div class="hero-body">
+      <div class="hero-top">
+        <div class="hero-main">
+          <div class="hero-label"><span class="hero-icon" id="heroIcon"></span>Current Status</div>
+          <div class="hero-status" id="heroStatus">--</div>
+        </div>
+        <div class="weather-badge" id="weatherBadge">
+          <div class="wb-loc">Port of Durban</div>
+          <div class="wb-top"><span class="wb-icon" id="wbIcon"></span><span class="wb-temp" id="wbTemp">--&deg;C</span></div>
+          <div class="wb-row" id="wbHum"></div>
+          <div class="wb-row" id="wbWind"></div>
+        </div>
+      </div>
+      <div class="hero-hours" id="heroHours"></div>
+      <div class="hero-duty" id="heroDuty"></div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-cell">
+        <div class="stat-label" id="cdLabel">Next Change</div>
+        <div class="stat-value ticker" id="countdown">--:--</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-label">Tomorrow</div>
+        <div class="stat-value" id="tomorrowVal">--</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="week" onclick="switchTab('week')">Week</button>
+    <button class="tab" data-tab="month" onclick="switchTab('month')">Month</button>
+    <button class="tab" data-tab="search" onclick="switchTab('search')">Search</button>
+    <a class="tab tab-link" href="https://www.marinetraffic.com/en/ais/home/centerx:31.032/centery:-29.890/zoom:13" target="_blank" rel="noopener">Port</a>
+  </div>
+
+  <div class="week-view active" id="weekView">
+    <div class="week-scroll" id="weekScroll"></div>
+    <div class="ph-panel" id="phPanel"></div>
+  </div>
+
+  <div class="month-view" id="monthView">
+    <div class="month-nav-row">
+      <button class="nav-btn" onclick="changeMonth(-1)" aria-label="Previous month"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+      <div class="month-title" id="monthTitle"></div>
+      <button class="nav-btn" onclick="changeMonth(1)" aria-label="Next month"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></button>
+    </div>
+    <div class="leave-bar">
+      <button class="leave-toggle" id="leaveToggle" onclick="toggleLeaveMode()">Plan leave</button>
+      <button class="leave-clear" id="leaveClear" onclick="clearMonthLeave()">Clear month</button>
+    </div>
+    <div class="leave-hint" id="leaveHint">Tap days to add or remove leave</div>
+    <div class="cal-wrap" id="calWrap">
+      <div class="cal-dow-row">
+        <div class="cal-dow">Mo</div><div class="cal-dow">Tu</div>
+        <div class="cal-dow">We</div><div class="cal-dow">Th</div>
+        <div class="cal-dow">Fr</div><div class="cal-dow">Sa</div>
+        <div class="cal-dow">Su</div>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+    </div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:var(--shift-night)"></div>Night</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--shift-day)"></div>Day</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--shift-standby)"></div>Standby</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--shift-rest)"></div>Rest</div>
+      <div class="legend-item"><div class="legend-dot legend-leave"></div>Leave</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#FFC107"></div>Holiday</div>
+    </div>
+    <div id="leaveSummary"></div>
+    <div id="monthHolidays"></div>
+  </div>
+
+  <div class="search-view" id="searchView">
+    <div class="search-label">Select a date</div>
+    <div class="date-wrap">
+      <input type="date" id="datePicker" class="date-picker" onchange="onDatePick(this.value)" onclick="try{this.showPicker()}catch(e){}">
+      <svg class="date-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18M8 14h2M14 14h2M8 17h2"/></svg>
+    </div>
+    <div id="searchResult"></div>
+  </div>
+
+</div>
+
+<script>
+// ── Config ──────────────────────────────────────────────────
+const ROTATION     = ["Night","Rest","Day","Standby"];
+const REF_DATE     = new Date(2026,1,27);
+const DAY_NAMES    = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+const FULL_DAYS    = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+const MONTH_NAMES  = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const SHIFT_HOURS  = { Night:"18:00 – 06:00", Day:"06:00 – 18:00", Standby:"On call 24h", Rest:"Day off" };
+const TEAM_OFFSETS = { D:0, C:1, A:2, B:3 };
+
+let selectedTeam = null;
+let viewMonth    = new Date();
+
+// ── Icons (inline SVG) ───────────────────────────────────────
+const ICON_PATHS = {
+  moon:'<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>',
+  sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+  phone:'<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/><path d="M14.1 2a9 9 0 0 1 8 7.9M14.1 6A5 5 0 0 1 18 10"/>',
+  bed:'<path d="M2 4v16M2 8h18a2 2 0 0 1 2 2v10M2 17h20M6 8v9"/>',
+  home:'<path d="M3 10l9-7 9 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/>',
+  suitcase:'<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 13h18"/>',
+  check:'<path d="M20 6L9 17l-5-5"/>',
+  trash:'<path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6M10 11v6M14 11v6"/>',
+  flag:'<path d="M4 22V4M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1"/>',
+  cloud:'<path d="M17.5 19H9a7 7 0 1 1 6.7-9h1.8a4.5 4.5 0 1 1 0 9z"/>',
+  partly:'<path d="M12 2v2M4.9 4.9l1.4 1.4M2 12h2M19.1 4.9l-1.4 1.4"/><path d="M15.9 10.1A4 4 0 0 0 8.1 11"/><path d="M13 22H7a5 5 0 1 1 4.9-6H13a3 3 0 0 1 0 6z"/>',
+  rain:'<path d="M20 16.6A5 5 0 0 0 18 7h-1.3A8 8 0 1 0 4 15.3"/><path d="M16 14v6M8 14v6M12 16v6"/>',
+  storm:'<path d="M19 16.9A5 5 0 0 0 18 7h-1.3A8 8 0 1 0 4 15.3"/><path d="M13 11l-4 6h6l-4 6"/>',
+  fog:'<path d="M5 9h14M3 13h18M5 17h14"/>',
+  drop:'<path d="M12 2.7l5.7 5.6a8 8 0 1 1-11.3 0z"/>',
+  nav:'<path d="M12 2l7 19-7-4-7 4z" fill="currentColor"/>',
+  wind:'<path d="M17.7 7.7A2.5 2.5 0 1 1 19.5 12H2M9.6 4.6A2 2 0 1 1 11 8H2M12.6 19.4A2 2 0 1 0 14 16H2"/>',
+  thermo:'<path d="M14 14.8V4a2 2 0 0 0-4 0v10.8a4 4 0 1 0 4 0z"/>',
+  wave:'<path d="M2 7c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1M2 17c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/>',
+  swell:'<path d="M2 15c3 0 4-7 7-7s4 7 7 7 4-3 6-3"/><path d="M2 20h20"/>',
+  anchor:'<circle cx="12" cy="5" r="3"/><path d="M12 22V8M5 12H2a10 10 0 0 0 20 0h-3"/>'
+};
+function svgIcon(name, size = 16) {
+  return `<svg class="ico" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON_PATHS[name] || ''}</svg>`;
+}
+const SHIFT_ICON = { Night:'moon', Day:'sun', Standby:'phone', Rest:'bed', Home:'home', Leave:'suitcase' };
+function shiftIcon(shift, size) { return svgIcon(SHIFT_ICON[shift] || 'sun', size); }
+let lastHeroTheme = null;
+
+// ── Persistence ──────────────────────────────────────────────
+function getTeamFromURL() {
+  try {
+    const p = new URLSearchParams(window.location.search).get('team');
+    return ['A','B','C','D'].includes(p) ? p : null;
+  } catch(e) { return null; }
+}
+function getTeam() {
+  return getTeamFromURL() || (localStorage.getItem('liteTeam') || null);
+}
+function saveTeam(t) {
+  try { localStorage.setItem('liteTeam', t); } catch(e) {}
+  // Update URL param without reloading page
+  try {
+    const url = new URL(window.location.href);
+    url.searchParams.set('team', t);
+    window.history.replaceState({}, '', url);
+  } catch(e) {}
+}
+function removeTeam() {
+  try { localStorage.removeItem('liteTeam'); } catch(e) {}
+  try {
+    const url = new URL(window.location.href);
+    url.searchParams.delete('team');
+    window.history.replaceState({}, '', url);
+  } catch(e) {}
+}
+
+// ── Shift calc ──────────────────────────────────────────────
+function daysBetween(a,b) {
+  return Math.round((Date.UTC(b.getFullYear(),b.getMonth(),b.getDate()) -
+                     Date.UTC(a.getFullYear(),a.getMonth(),a.getDate())) / 86400000);
+}
+
+function getShiftForDate(date) {
+  const days   = daysBetween(REF_DATE, date);
+  const offset = TEAM_OFFSETS[selectedTeam] ?? 0;
+  let count = 0;
+  if (days >= 0) {
+    for (let i=1; i<=days; i++) {
+      const wd = new Date(REF_DATE.getFullYear(),REF_DATE.getMonth(),REF_DATE.getDate()+i).getDay();
+      if (wd===1||wd===3||wd===5) count++;
+    }
+    return ROTATION[((count + offset) % 4 + 4) % 4];
+  } else {
+    for (let i=1; i<=-days; i++) {
+      const wd = new Date(REF_DATE.getFullYear(),REF_DATE.getMonth(),REF_DATE.getDate()-i).getDay();
+      if (wd===1||wd===3||wd===5) count++;
+    }
+    return ROTATION[(((-count) + offset) % 4 + 4) % 4];
+  }
+}
+
+// ── Helpers ──────────────────────────────────────────────────
+function today0()     { const d=new Date(); d.setHours(0,0,0,0); return d; }
+function addDays(d,n) { return new Date(d.getFullYear(),d.getMonth(),d.getDate()+n); }
+
+function nextChange(now) {
+  const h    = now.getHours();
+  const next = new Date(now);
+  if (h<6)       { next.setHours(6,0,0,0); }
+  else if (h<18) { next.setHours(18,0,0,0); }
+  else           { next.setDate(next.getDate()+1); next.setHours(6,0,0,0); }
+  return next;
+}
+
+// Countdown with digits that slide in when they change
+function setCountdown(str) {
+  const el = document.getElementById('countdown');
+  if (!el) return;
+  if (el.children.length !== str.length) {
+    el.innerHTML = [...str].map(ch => `<span class="cd-d">${ch}</span>`).join('');
+    return;
+  }
+  [...str].forEach((ch, i) => {
+    const span = el.children[i];
+    if (span.textContent !== ch) {
+      span.textContent = ch;
+      span.classList.remove('roll'); void span.offsetWidth; span.classList.add('roll');
+    }
+  });
+}
+
+function fmtCountdown(ms) {
+  if (ms<=0) return "00:00:00";
+  const s = Math.floor(ms/1000);
+  return [Math.floor(s/3600),Math.floor((s%3600)/60),s%60].map(n=>String(n).padStart(2,'0')).join(':');
+}
+
+// ── Onboarding ───────────────────────────────────────────────
+function selectTeam(team) {
+  selectedTeam = team;
+  document.querySelectorAll('.team-btn').forEach(b =>
+    b.classList.toggle('selected', b.textContent === team));
+  document.getElementById('confirmBtn').classList.add('ready');
+  if (navigator.vibrate) navigator.vibrate(10);
+}
+
+function confirmTeam() {
+  if (!selectedTeam) return;
+  saveTeam(selectedTeam);
+  document.getElementById('onboarding').classList.add('hidden');
+  document.getElementById('app').style.display = '';
+  applyTeam();
+  updateHero();
+  buildWeekView();
+  buildMonthView();
+  buildPHPanel();
+  onDatePick(document.getElementById('datePicker').value);
+  if (!harbourData.updatedAt) fetchHarbourWeather();
+  if (navigator.vibrate) navigator.vibrate([10,40,10]);
+}
+
+
+function applyTeam() {
+  document.getElementById('headerTitle').textContent = 'Shift Tracker';
+  document.getElementById('teamBadge').textContent = selectedTeam || '\u2013';
+  loadLeave();   // switch to this team's own leave plan
+}
+
+// ── Hero ─────────────────────────────────────────────────────
+function updateHero() {
+  const now  = new Date();
+  const h    = now.getHours();
+  const t    = today0();
+  const yest = addDays(t,-1);
+  const tom  = addDays(t,1);
+  const todayShift     = getShiftForDate(t);
+  const yesterdayShift = getShiftForDate(yest);
+
+  let label, hours, theme;
+
+  // Yesterday's Night still active (00:00–06:00)
+  const inYesterdayNight = h < 6 && yesterdayShift === 'Night';
+
+  // Day ended 18:00, 12hr rest before Standby at 06:00
+  const inPostDayBuffer = h < 6 && yesterdayShift === 'Day' && todayShift === 'Standby';
+
+  if (inYesterdayNight) {
+    label='Night Shift'; hours='18:00 – 06:00'; theme='Night';
+
+  } else if (inPostDayBuffer) {
+    label='Off Duty'; hours='Standby from 06:00'; theme='Standby';
+
+  } else if (todayShift === 'Day') {
+    if (h >= 6 && h < 18) {
+      label='Day Shift'; hours='06:00 – 18:00'; theme='Day';
+    } else if (h < 6) {
+      // Rest → Day: midnight to 06:00
+      label='Off Duty'; hours='Day shift starts at 06:00'; theme='Day';
+    } else {
+      // After 18:00 — knocked off
+      label='Off Duty';
+      const tomShift2 = getShiftForDate(tom);
+      if (tomShift2 === 'Day')          { hours='06:00 – 18:00'; theme='Day'; }
+      else if (tomShift2 === 'Night')   { hours='18:00 – 06:00'; theme='Night'; }
+      else if (tomShift2 === 'Standby') { hours='Standby from 06:00'; theme='Standby'; }
+      else                              { hours=''; theme='Home'; }
+    }
+
+  } else if (todayShift === 'Night') {
+    if (h >= 18) {
+      label='Night Shift'; hours='18:00 – 06:00'; theme='Night';
+    } else {
+      // Standby → Night: waiting for tonight
+      label='Off Duty'; hours='Night shift starts at 18:00'; theme='Night';
+    }
+
+  } else if (todayShift === 'Standby') {
+    label='On Call'; hours='24h Standby'; theme='Standby';
+
+  } else if (todayShift === 'Rest') {
+    label='Rest Day'; hours='Day off'; theme='Rest';
+
+  } else {
+    label=todayShift; hours=SHIFT_HOURS[todayShift]||''; theme=todayShift;
+  }
+
+  // Planned leave overrides a working shift
+  const leaveRef = inYesterdayNight ? yest : t;
+  if (!inPostDayBuffer && isLeave(leaveRef) && leaveCosts(getShiftForDate(leaveRef))) {
+    label = 'On Leave'; hours = 'Enjoy your time off'; theme = 'Leave';
+  }
+  document.body.className = `shift-${theme}`;
+  // Off Duty shows a house, tinted in the colour of the shift that's coming up (colour comes from theme)
+  const offDuty = label === 'Off Duty';
+  const iconKey = (offDuty ? 'Home:' : '') + theme;
+  if (iconKey !== lastHeroTheme) {
+    const heroIconEl = document.getElementById('heroIcon');
+    heroIconEl.innerHTML = shiftIcon(offDuty ? 'Home' : theme, 15);
+    heroIconEl.classList.toggle('off-duty', offDuty);
+    lastHeroTheme = iconKey;
+  }
+  document.getElementById('heroStatus').textContent = label;
+  document.getElementById('heroHours').textContent  = hours;
+  document.getElementById('headerDate').textContent =
+    `${FULL_DAYS[now.getDay()]} · ${now.getDate()} ${MONTH_NAMES[now.getMonth()]}`;
+
+  document.getElementById('cdLabel').textContent   = label === 'Off Duty' ? 'Shift Starts' : 'Next Change';
+  setCountdown(fmtCountdown(nextChange(now)-now));
+
+  const tShift = getShiftForDate(tom);
+  const tLabels = { Day:'Day', Night:'Night', Standby:'Standby', Rest:'Rest' };
+  const tomLeave = isLeave(tom) && leaveCosts(tShift);
+  const tKey = tomLeave ? 'Leave' : tShift;
+  document.getElementById('tomorrowVal').innerHTML =
+    `<span class="tm-ic" style="color:${TOMORROW_COLOR[tKey] || '#9da0a8'}">${shiftIcon(tKey, 22)}</span><span>${tomLeave ? 'Leave' : (tLabels[tShift] || tShift)}</span>`;
+
+  // On duty now: Day team 06:00–18:00, Night team 18:00–06:00 (after midnight it's still last night's team)
+  const duty = teamOnDuty(now);
+  document.getElementById('heroDuty').innerHTML = duty
+    ? `On duty now · <b>Team ${duty.team}</b> · ${duty.shift}` : '';
+}
+
+// ── Team on duty ──────────────────────────────────────────────
+const TOMORROW_COLOR = { Night:'#6d82ff', Day:'#ffa726', Standby:'#26a69a', Rest:'#66bb6a', Leave:'#ce93d8' };
+function shiftForTeam(team, date) {
+  const keep = selectedTeam;
+  selectedTeam = team;
+  const s = getShiftForDate(date);
+  selectedTeam = keep;
+  return s;
+}
+function teamOnDuty(now) {
+  const h = now.getHours();
+  const t = today0();
+  const shift = (h >= 6 && h < 18) ? 'Day' : 'Night';
+  const date = h < 6 ? addDays(t, -1) : t;
+  const team = ['A','B','C','D'].find(x => shiftForTeam(x, date) === shift);
+  return team ? { team, shift } : null;
+}
+
+// ── Week ─────────────────────────────────────────────────────
+function buildWeekView() {
+  const c = document.getElementById('weekScroll');
+  c.innerHTML = '';
+  const t = today0();
+  for (let i=0; i<7; i++) {
+    const d       = addDays(t,i);
+    const shift   = getShiftForDate(d);
+    const isPHDay = isHolidayDate(d);
+    const onLeave = isLeave(d) && leaveCosts(shift);
+    const card = document.createElement('div');
+    card.className = `day-card day-card-${shift}${i===0?' today':''}${isPHDay?' is-ph':''}${onLeave?' on-leave':''}`;
+    card.style.animationDelay = `${i*45}ms`;
+    card.innerHTML = `
+      <div class="day-card-top-bar"></div>
+      ${isPHDay ? '<div class="ph-card-dot"></div>' : ''}
+      <div class="day-dow">${DAY_NAMES[d.getDay()]}</div>
+      <div class="day-num">${d.getDate()}</div>
+      <div class="day-shift-chip">${onLeave ? svgIcon('suitcase',10) + 'Leave' : shiftIcon(shift,10) + shift}</div>
+      <div class="day-hours">${onLeave ? 'On leave' : SHIFT_HOURS[shift]}</div>
+      ${i===0?'<div class="today-label">Today</div>':''}`;
+    c.appendChild(card);
+  }
+}
+
+// ── Leave planner ─────────────────────────────────────────────
+// Personal planning only: saved in this browser on this phone.
+let leaveMode = false;
+let leaveSet = new Set();
+let lastToggledKey = null;
+let monthAnimDir = null;
+
+// Leave is saved per team (liteLeave_A … liteLeave_D), so it only shows on the team it was planned for.
+function leaveKey() { return 'liteLeave_' + selectedTeam; }
+function loadLeave() {
+  leaveSet = new Set();
+  if (!selectedTeam) return;
+  try {
+    // One-time move: leave saved before per-team storage belongs to the team currently selected
+    const old = localStorage.getItem('liteLeave');
+    if (old !== null) {
+      if (localStorage.getItem(leaveKey()) === null) localStorage.setItem(leaveKey(), old);
+      localStorage.removeItem('liteLeave');
+    }
+    leaveSet = new Set(JSON.parse(localStorage.getItem(leaveKey()) || '[]'));
+  } catch(e) { leaveSet = new Set(); }
+}
+function saveLeave() {
+  if (!selectedTeam) return;
+  try { localStorage.setItem(leaveKey(), JSON.stringify([...leaveSet])); } catch(e) {}
+}
+function isLeave(d) { return leaveSet.has(dateKey(d)); }
+// Only Night and Day shifts use up a leave day
+function leaveCosts(shift) { return shift === 'Night' || shift === 'Day'; }
+
+function toggleLeaveMode() {
+  leaveMode = !leaveMode;
+  renderLeaveModeUI();
+  buildLeaveSummary();
+  if (navigator.vibrate) navigator.vibrate(10);
+}
+function monthHasLeave(y, m) {
+  const last = new Date(y, m+1, 0).getDate();
+  for (let day=1; day<=last; day++) if (leaveSet.has(dateKey(new Date(y, m, day)))) return true;
+  return false;
+}
+function renderLeaveModeUI() {
+  const btn = document.getElementById('leaveToggle');
+  if (!btn) return;
+  const y = viewMonth.getFullYear(), m = viewMonth.getMonth();
+  const hasLeave = monthHasLeave(y, m);
+  btn.classList.toggle('active', leaveMode);
+  btn.innerHTML = leaveMode
+    ? `${svgIcon('check', 13)}<span>Done</span>`
+    : `${svgIcon('suitcase', 13)}<span>${hasLeave ? 'Edit leave' : 'Plan leave'}</span>`;
+  const clr = document.getElementById('leaveClear');
+  const showClear = leaveMode && hasLeave;
+  clr.classList.toggle('show', showClear);
+  if (!showClear || !clr.classList.contains('armed')) disarmClear();
+  document.getElementById('leaveHint').classList.toggle('show', leaveMode);
+  document.getElementById('calWrap').classList.toggle('leave-mode', leaveMode);
+}
+let clearTimer = null;
+function disarmClear() {
+  clearTimeout(clearTimer); clearTimer = null;
+  const clr = document.getElementById('leaveClear');
+  if (!clr) return;
+  clr.classList.remove('armed');
+  clr.innerHTML = `${svgIcon('trash', 13)}<span>Clear ${MONTH_NAMES[viewMonth.getMonth()]}</span>`;
+}
+function refreshAfterLeaveChange() {
+  saveLeave();
+  buildMonthView(true);
+  buildWeekView();
+  updateHero();
+}
+function toggleLeaveDay(key) {
+  if (leaveSet.has(key)) leaveSet.delete(key); else leaveSet.add(key);
+  lastToggledKey = key;
+  refreshAfterLeaveChange();
+  if (navigator.vibrate) navigator.vibrate(8);
+}
+// Two taps to clear: the first arms the button for 3 seconds, the second clears
+function clearMonthLeave() {
+  const clr = document.getElementById('leaveClear');
+  if (!clr.classList.contains('armed')) {
+    clr.classList.add('armed');
+    clr.innerHTML = `${svgIcon('trash', 13)}<span>Tap again to clear</span>`;
+    clearTimeout(clearTimer);
+    clearTimer = setTimeout(disarmClear, 3000);
+    if (navigator.vibrate) navigator.vibrate(15);
+    return;
+  }
+  disarmClear();
+  const y = viewMonth.getFullYear(), m = viewMonth.getMonth();
+  const last = new Date(y, m+1, 0).getDate();
+  for (let day=1; day<=last; day++) leaveSet.delete(dateKey(new Date(y, m, day)));
+  refreshAfterLeaveChange();
+  if (navigator.vibrate) navigator.vibrate([10,40,10]);
+}
+
+function buildLeaveSummary() {
+  const el = document.getElementById('leaveSummary');
+  const y = viewMonth.getFullYear(), m = viewMonth.getMonth();
+  const monthStart = new Date(y, m, 1), monthEnd = new Date(y, m+1, 0);
+  const mName = MONTH_NAMES[m];
+  const works = d => leaveCosts(getShiftForDate(d)) && !isLeave(d);   // a Day/Night you actually go to work
+
+  // Leave days used in this month (Night/Day only)
+  let used = 0, marked = 0;
+  for (let d = new Date(monthStart); d <= monthEnd; d = addDays(d,1)) {
+    if (isLeave(d)) { marked++; if (leaveCosts(getShiftForDate(d))) used++; }
+  }
+
+  // Breaks: first leave day to last leave day. Rest/Standby in between keep it joined;
+  // only a Day/Night shift that isn't marked as leave splits it.
+  const breaks = []; let cur = null;
+  for (let d = addDays(monthStart,-62); d <= addDays(monthEnd,62); d = addDays(d,1)) {
+    if (isLeave(d) && leaveCosts(getShiftForDate(d))) {
+      if (!cur) { cur = { start:d, end:d, used:0 }; breaks.push(cur); }
+      cur.end = d;
+      cur.used++;
+    } else if (works(d)) cur = null;
+  }
+  const shown = breaks.filter(b => b.end >= monthStart && b.start <= monthEnd);
+
+  const title = `<div class="section-title"><span>${svgIcon('suitcase',12)} Leave · ${mName}</span></div>`;
+  if (!marked) {
+    el.innerHTML = title + `<div class="leave-empty">No leave planned. Tap <b>Plan leave</b> above, then tap days on the calendar. Only Night and Day shifts use a leave day.</div>`;
+    return;
+  }
+  const fmt = d => `${DAY_NAMES[d.getDay()]} ${d.getDate()} ${MONTH_NAMES[d.getMonth()].slice(0,3)}`;
+  const plural = n => `${n} leave day${n===1?'':'s'}`;
+  el.innerHTML = title + `<div class="leave-card">
+    ${shown.map(b => `<div class="leave-range">
+      <div class="lr-dates">${b.start.getTime()===b.end.getTime() ? fmt(b.start) : fmt(b.start) + ' – ' + fmt(b.end)}</div>
+      <div class="lr-meta">${plural(b.used)}</div>
+    </div>`).join('')}
+  </div>`;
+}
+
+function buildMonthHolidays() {
+  const el = document.getElementById('monthHolidays');
+  const y = viewMonth.getFullYear(), m = viewMonth.getMonth();
+  const first = new Date(y, m, 1);
+  const list = getHolidaysInRange(first, new Date(y, m+1, 0).getDate());
+  const title = `<div class="section-title"><span>${svgIcon('flag',12)} Public holidays · ${MONTH_NAMES[m]}</span></div>`;
+  if (!list.length) { el.innerHTML = title + `<div class="ph-empty">No public holidays in ${MONTH_NAMES[m]}</div>`; return; }
+  el.innerHTML = title + list.map((ph, i) => {
+    const { hours, shift, chipColor } = calcPHHours(ph.date);
+    const onLeave = isLeave(ph.date) && leaveCosts(shift);
+    const dateStr = `${DAY_NAMES[ph.date.getDay()]} ${ph.date.getDate()} ${MONTH_NAMES[ph.date.getMonth()].slice(0,3)}`;
+    const obsTag  = ph.observed ? '<span class="ph-observed-tag">observed</span>' : '';
+    const right = onLeave
+      ? `<div class="ph-hours-val leave">Leave</div><div class="ph-hours-detail">planned</div>`
+      : `<div class="ph-hours-val${hours===0?' zero':''}">${hours}</div><div class="ph-hours-detail">hours</div>`;
+    return `<div class="ph-card" style="animation-delay:${i*50}ms">
+      <div class="ph-card-accent"></div>
+      <div class="ph-card-body">
+        <div class="ph-card-left">
+          <div class="ph-card-name">${ph.name}${obsTag}</div>
+          <div class="ph-card-date">${dateStr} &nbsp;·&nbsp; <span class="ph-shift-chip" style="${chipColor}">${shiftIcon(shift,10)} ${shift}</span></div>
+        </div>
+        <div class="ph-card-right">${right}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── Hero 3D tilt (touch, mouse and phone motion) ─────────────
+function initTilt() {
+  const card = document.getElementById('heroCard');
+  if (!card) return;
+  if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const MAX = 4;
+  let raf = null;
+  const apply = (x, y) => {
+    if (raf) cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(() => {
+      card.style.transform = `perspective(900px) rotateX(${(-y*MAX).toFixed(2)}deg) rotateY(${(x*MAX).toFixed(2)}deg)`;
+      card.style.setProperty('--gx', `${((x+0.5)*100).toFixed(1)}%`);
+      card.style.setProperty('--gy', `${((y+0.5)*100).toFixed(1)}%`);
+    });
+  };
+  card.addEventListener('pointermove', e => {
+    const r = card.getBoundingClientRect();
+    apply((e.clientX - r.left)/r.width - 0.5, (e.clientY - r.top)/r.height - 0.5);
+  });
+  ['pointerleave','pointerup','pointercancel'].forEach(ev => card.addEventListener(ev, () => { card.style.transform = ''; }));
+  // Android: gentle tilt as the phone moves, drifting back to flat when held still
+  if (window.DeviceOrientationEvent && typeof DeviceOrientationEvent.requestPermission !== 'function') {
+    let base = null;
+    window.addEventListener('deviceorientation', e => {
+      if (e.gamma == null || e.beta == null) return;
+      if (!base) base = { g: e.gamma, b: e.beta };
+      base.g += (e.gamma - base.g) * 0.02;
+      base.b += (e.beta - base.b) * 0.02;
+      const clamp = v => Math.max(-0.5, Math.min(0.5, v));
+      apply(clamp((e.gamma - base.g)/40), clamp((e.beta - base.b)/40));
+    });
+  }
+}
+
+loadLeave();
+
+// ── Month ─────────────────────────────────────────────────────
+function buildMonthView(noAnim) {
+  const grid = document.getElementById('calGrid');
+  grid.innerHTML = '';
+  grid.classList.remove('anim-in','anim-left','anim-right');
+  if (!noAnim) { void grid.offsetWidth; grid.classList.add(monthAnimDir || 'anim-in'); }
+  monthAnimDir = null;
+  const t = today0();
+  document.getElementById('monthTitle').textContent =
+    `${MONTH_NAMES[viewMonth.getMonth()]} ${viewMonth.getFullYear()}`;
+
+  const first  = new Date(viewMonth.getFullYear(),viewMonth.getMonth(),1);
+  const last   = new Date(viewMonth.getFullYear(),viewMonth.getMonth()+1,0);
+  const offset = first.getDay()===0 ? 6 : first.getDay()-1;
+
+  for (let i=0; i<offset; i++) {
+    const e = document.createElement('div');
+    e.className = 'cal-cell cal-cell-empty';
+    grid.appendChild(e);
+  }
+
+  for (let day=1; day<=last.getDate(); day++) {
+    const d       = new Date(viewMonth.getFullYear(),viewMonth.getMonth(),day);
+    const shift   = getShiftForDate(d);
+    const isToday = d.getTime()===t.getTime();
+    const isPH    = isHolidayDate(d);
+    const key     = dateKey(d);
+    const leave   = leaveSet.has(key);
+    const cost    = leave && leaveCosts(shift);
+    const cell    = document.createElement('div');
+    cell.className = `cal-cell cal-cell-${shift}${isToday?' is-today':''}${isPH?' is-ph':''}${leave ? (cost ? ' is-leave' : ' is-leave-free') : ''}${key===lastToggledKey?' just-toggled':''}`;
+    cell.style.setProperty('--i', day);
+    cell.innerHTML = `
+      ${isPH ? '<div class="ph-cell-dot"></div>' : ''}
+      <div class="cal-num">${day}</div>
+      <div class="cal-shift-label">${cost ? 'Leave' : shift.substring(0,3)}</div>`;
+    cell.addEventListener('click', () => { if (leaveMode) toggleLeaveDay(key); });
+    grid.appendChild(cell);
+  }
+  lastToggledKey = null;
+  buildLeaveSummary();
+  renderLeaveModeUI();
+  buildMonthHolidays();
+}
+
+function changeMonth(dir) {
+  viewMonth = new Date(viewMonth.getFullYear(),viewMonth.getMonth()+dir,1);
+  monthAnimDir = dir > 0 ? 'anim-left' : 'anim-right';
+  disarmClear();
+  buildMonthView();
+}
+
+// ── Search ────────────────────────────────────────────────────
+function onDatePick(val) {
+  if (!val) return;
+  const parts   = val.split('-');
+  const d       = new Date(+parts[0],+parts[1]-1,+parts[2]);
+  const shift   = getShiftForDate(d);
+  const dateStr = `${FULL_DAYS[d.getDay()]}, ${d.getDate()} ${MONTH_NAMES[d.getMonth()]} ${d.getFullYear()}`;
+  const holidays = getHolidaysForYear(d.getFullYear());
+  const phMatch  = holidays.find(ph => {
+    const obs = getObservedDate(d.getFullYear(), ph.month, ph.day);
+    return obs.toDateString() === d.toDateString();
+  });
+  const phRow = phMatch
+    ? `<div class="result-ph-row">🇿🇦 <span>${phMatch.name} — Public Holiday</span></div>` : '';
+
+  const leaveRow = isLeave(d) && leaveCosts(shift)
+    ? `<div class="result-ph-row" style="color:#ce93d8">${svgIcon('suitcase',13)} <span>Planned leave</span></div>` : '';
+
+  document.getElementById('searchResult').innerHTML = `
+    <div class="result-card result-${shift}${phMatch?' is-ph':''}">
+      <div class="result-color-bar"></div>
+      <div class="result-body">
+        <div class="result-date-str">${dateStr}</div>
+        <div class="result-shift-name">${shift}</div>
+        <div class="result-divider"></div>
+        <div class="result-meta">
+          <span class="result-meta-label">Hours</span>
+          <span class="result-meta-value">${SHIFT_HOURS[shift]}</span>
+        </div>
+        ${phRow}${leaveRow}
+      </div>
+    </div>`;
+}
+
+// ── Tabs ──────────────────────────────────────────────────────
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  ['week','month','search'].forEach(v =>
+    document.getElementById(v + 'View').classList.toggle('active', v === tab));
+  if (tab==='month') buildMonthView();
+  if (tab==='search') {
+    const t   = today0();
+    const iso = `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`;
+    const picker = document.getElementById('datePicker');
+    if (!picker.value) { picker.value=iso; onDatePick(iso); }
+  }
+}
+
+// ── SA Public Holidays (Dynamic Easter) ──────────────────────
+function getHolidaysForYear(year) {
+  const a = year % 19, b = Math.floor(year / 100), c = year % 100;
+  const d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25);
+  const g = Math.floor((b - f + 1) / 3);
+  const h = (19 * a + b - d - g + 15) % 30;
+  const i = Math.floor(c / 4), k = c % 4;
+  const l = (32 + 2 * e + 2 * i - h - k) % 7;
+  const m = Math.floor((a + 11 * h + 22 * l) / 451);
+  const month = Math.floor((h + l - 7 * m + 114) / 31);
+  const day   = ((h + l - 7 * m + 114) % 31) + 1;
+  const goodFriday = new Date(year, month - 1, day - 2);
+  const familyDay  = new Date(year, month - 1, day + 1);
+  return [
+    { month:1,  day:1,  name:"New Year's Day" },
+    { month:3,  day:21, name:"Human Rights Day" },
+    { month:goodFriday.getMonth()+1, day:goodFriday.getDate(), name:"Good Friday" },
+    { month:familyDay.getMonth()+1,  day:familyDay.getDate(),  name:"Family Day" },
+    { month:4,  day:27, name:"Freedom Day" },
+    { month:5,  day:1,  name:"Workers' Day" },
+    { month:6,  day:16, name:"Youth Day" },
+    { month:8,  day:9,  name:"National Women's Day" },
+    { month:9,  day:24, name:"Heritage Day" },
+    { month:12, day:16, name:"Day of Reconciliation" },
+    { month:12, day:25, name:"Christmas Day" },
+    { month:12, day:26, name:"Day of Goodwill" },
+  ];
+}
+
+function dateKey(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function getObservedDate(year, month, day) {
+  const d = new Date(year, month - 1, day);
+  if (d.getDay() === 0) return new Date(year, month - 1, day + 1);
+  return d;
+}
+
+function getHolidaysInRange(fromDate, days) {
+  const results = [];
+  const to   = addDays(fromDate, days);
+  const seen = new Set();
+  const years = [...new Set([fromDate.getFullYear(), to.getFullYear()])];
+  years.forEach(year => {
+    getHolidaysForYear(year).forEach(ph => {
+      const observed = getObservedDate(year, ph.month, ph.day);
+      const key = dateKey(observed);
+      if (seen.has(key)) return;
+      if (observed >= fromDate && observed < to) {
+        seen.add(key);
+        const isObserved = observed.getDate() !== ph.day || observed.getMonth() !== ph.month - 1;
+        results.push({ date: observed, name: ph.name, observed: isObserved });
+      }
+    });
+  });
+  results.sort((a,b) => a.date - b.date);
+  return results;
+}
+
+function isHolidayDate(d) {
+  const key  = dateKey(d);
+  const year = d.getFullYear();
+  return getHolidaysForYear(year).some(ph => dateKey(getObservedDate(year, ph.month, ph.day)) === key);
+}
+
+function calcPHHours(holidayDate) {
+  const shift     = getShiftForDate(holidayDate);
+  const prevShift = getShiftForDate(addDays(holidayDate, -1));
+  let hours = 0, chipColor = '';
+  if (shift === 'Day') {
+    hours = 12; chipColor = 'background:rgba(255,143,0,0.15);color:#ff8f00';
+  } else if (shift === 'Night') {
+    hours = 6;  chipColor = 'background:rgba(61,90,254,0.15);color:#3d5afe';
+    if (prevShift === 'Night') hours = 12;
+  } else if (shift === 'Rest' || shift === 'Standby') {
+    if (prevShift === 'Night') {
+      hours = 6; chipColor = 'background:rgba(61,90,254,0.15);color:#3d5afe';
+    } else {
+      hours = 0; chipColor = 'background:rgba(255,255,255,0.06);color:#9da0a8';
+    }
+  }
+  return { hours, shift, chipColor };
+}
+
+function buildPHPanel() {
+  const panel = document.getElementById('phPanel');
+  if (!panel) return;
+  const holidays = getHolidaysInRange(today0(), 30);
+  if (holidays.length === 0) {
+    panel.innerHTML = '<div class="ph-empty">No public holidays in the next 30 days</div>';
+    return;
+  }
+  const DS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const MS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  panel.innerHTML = '<div class="ph-panel-title">🇿🇦 Public Holidays</div>' +
+    holidays.map(ph => {
+      const { hours, shift, chipColor } = calcPHHours(ph.date);
+      const dateStr = `${DS[ph.date.getDay()]} ${ph.date.getDate()} ${MS[ph.date.getMonth()]}`;
+      const obsTag  = ph.observed ? '<span class="ph-observed-tag">observed</span>' : '';
+      return `<div class="ph-card">
+        <div class="ph-card-accent"></div>
+        <div class="ph-card-body">
+          <div class="ph-card-left">
+            <div class="ph-card-name">${ph.name}${obsTag}</div>
+            <div class="ph-card-date">${dateStr} &nbsp;·&nbsp; <span class="ph-shift-chip" style="${chipColor}">${shiftIcon(shift,10)} ${shift}</span></div>
+          </div>
+          <div class="ph-card-right">
+            <div class="ph-hours-val${hours===0?' zero':''}">${hours}</div>
+            <div class="ph-hours-detail">hours</div>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+}
+
+// ── Harbour Weather ──────────────────────────────────────────
+const HARBOUR_AIR_LAT = -29.9122, HARBOUR_AIR_LON = 30.9756;   // Island View, Durban
+const HARBOUR_SEA_LAT = -29.8567, HARBOUR_SEA_LON = 31.0600;   // Durban Golden Mile, open coast
+const HARBOUR_REFRESH_MS = 60 * 60 * 1000; // 1 hour
+const HARBOUR_CACHE_KEY = 'harbourWeatherCache';
+let harbourData = { air: null, marine: null, updatedAt: null };
+
+function compassLabel(deg) {
+  if (deg === null || deg === undefined) return '--';
+  const dirs = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+  return dirs[Math.round(deg / 22.5) % 16];
+}
+
+function wmoIcon(code, isDay) {
+  let ic = 'cloud';
+  if (code === 0) ic = 'sun';
+  else if (code <= 2) ic = 'partly';
+  else if (code === 3) ic = 'cloud';
+  else if (code === 45 || code === 48) ic = 'fog';
+  else if (code >= 95) ic = 'storm';
+  else if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) ic = 'rain';
+  if (isDay === 0 && ic === 'sun') ic = 'moon';
+  if (isDay === 0 && ic === 'partly') ic = 'cloud';
+  return ic;
+}
+
+
+function renderHarbourWeather() {
+  const { air } = harbourData;
+  const badge = document.getElementById('weatherBadge');
+  if (!badge) return;
+  const ic = air ? wmoIcon(air.weather_code, air.is_day) : 'cloud';
+  const iconEl = document.getElementById('wbIcon');
+  if (iconEl.dataset.ic !== ic) {
+    iconEl.className = `wb-icon w-${ic}`;
+    iconEl.innerHTML = svgIcon(ic, 20);
+    iconEl.dataset.ic = ic;
+  }
+  document.getElementById('wbTemp').textContent =
+    air?.temperature_2m != null ? Math.round(air.temperature_2m) + '°C' : '--°C';
+  document.getElementById('wbHum').innerHTML = air?.relative_humidity_2m != null
+    ? `<span class="wb-drop">${svgIcon('drop', 13)}</span>${Math.round(air.relative_humidity_2m)}%` : '';
+  const windDeg = air?.wind_direction_10m;
+  document.getElementById('wbWind').innerHTML = air?.wind_speed_10m != null
+    ? `<span class="wb-arrow" style="transform:rotate(${(windDeg ?? 0) + 180}deg);--sway-dur:${Math.max(0.8, 4 - air.wind_speed_10m / 12).toFixed(2)}s">${svgIcon('nav', 12)}</span>${compassLabel(windDeg)} ${Math.round(air.wind_speed_10m)} km/h` : '';
+  if (air) badge.classList.add('loaded');
+}
+
+
+async function fetchHarbourWeather() {
+  if (location.protocol === 'file:') {
+    renderHarbourWeather();
+    return;
+  }
+  const airUrl = `https://api.open-meteo.com/v1/forecast?latitude=${HARBOUR_AIR_LAT}&longitude=${HARBOUR_AIR_LON}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,wind_direction_10m,weather_code,is_day&hourly=precipitation_probability&forecast_days=1&wind_speed_unit=kmh&timezone=Africa%2FJohannesburg`;
+  const seaUrl = `https://marine-api.open-meteo.com/v1/marine?latitude=${HARBOUR_SEA_LAT}&longitude=${HARBOUR_SEA_LON}&current=wave_height,wave_direction,wave_period,swell_wave_height,swell_wave_direction,sea_surface_temperature&cell_selection=sea&timezone=Africa%2FJohannesburg`;
+
+  const results = await Promise.allSettled([
+    fetch(airUrl).then(r => r.ok ? r.json() : Promise.reject(new Error('air HTTP ' + r.status))),
+    fetch(seaUrl).then(r => r.ok ? r.json() : Promise.reject(new Error('marine HTTP ' + r.status)))
+  ]);
+
+  if (results[0].status === 'rejected') console.error('Harbour air fetch failed:', results[0].reason);
+  if (results[1].status === 'rejected') console.error('Harbour marine fetch failed:', results[1].reason);
+
+  let newAir = null;
+  if (results[0].status === 'fulfilled' && results[0].value?.current) {
+    newAir = { ...results[0].value.current };
+    const hourly = results[0].value.hourly;
+    if (hourly?.time && hourly?.precipitation_probability) {
+      const curTime = newAir.time || '';
+      const curPrefix = curTime.slice(0, 13); // "YYYY-MM-DDTHH"
+      let idx = hourly.time.findIndex(t => t.slice(0, 13) === curPrefix);
+      if (idx < 0 && curTime) {
+        const curMs = new Date(curTime).getTime();
+        let bestDiff = Infinity;
+        hourly.time.forEach((t, i) => {
+          const diff = Math.abs(new Date(t).getTime() - curMs);
+          if (diff < bestDiff) { bestDiff = diff; idx = i; }
+        });
+      }
+      newAir.precipitation_probability = idx >= 0 ? hourly.precipitation_probability[idx] : null;
+    }
+  }
+  const newMarine = results[1].status === 'fulfilled' && results[1].value?.current ? results[1].value.current : null;
+
+  if (newAir || newMarine) {
+    harbourData = {
+      air: newAir || harbourData.air,
+      marine: newMarine || harbourData.marine,
+      updatedAt: Date.now()
+    };
+    try { localStorage.setItem(HARBOUR_CACHE_KEY, JSON.stringify(harbourData)); } catch(e) {}
+  } else if (!harbourData.updatedAt) {
+    let cached = null;
+    try { cached = JSON.parse(localStorage.getItem(HARBOUR_CACHE_KEY)); } catch(e2) {}
+    if (cached) harbourData = cached;
+  }
+  renderHarbourWeather();
+}
+
+// ── Init ──────────────────────────────────────────────────────
+const saved = getTeam();
+if (saved) {
+  selectedTeam = saved;
+  document.getElementById('onboarding').classList.add('hidden');
+  document.getElementById('app').style.display = '';
+  applyTeam();
+  updateHero();
+  buildWeekView();
+  buildPHPanel();
+
+  let harbourCached = null;
+  try { harbourCached = JSON.parse(localStorage.getItem(HARBOUR_CACHE_KEY)); } catch(e) {}
+  if (harbourCached) { harbourData = harbourCached; renderHarbourWeather(); }
+  fetchHarbourWeather();
+  setInterval(fetchHarbourWeather, HARBOUR_REFRESH_MS);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      const staleMs = harbourData.updatedAt ? Date.now() - harbourData.updatedAt : Infinity;
+      if (staleMs > 15 * 60 * 1000) fetchHarbourWeather();
+    }
+  });
+} else {
+  document.getElementById('app').style.display = 'none';
+}
+
+setInterval(()=>{
+  setCountdown(fmtCountdown(nextChange(new Date())-new Date()));
+}, 1000);
+setInterval(updateHero, 60000);
+setInterval(renderHarbourWeather, 60000);
+
+renderLeaveModeUI();
+initTilt();
+
+// ── Team switch sheet ─────────────────────────────────────────
+function openTeamSheet() {
+  document.querySelectorAll('.ts-btn').forEach(b => b.classList.toggle('current', b.dataset.team === selectedTeam));
+  document.getElementById('teamSheet').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  if (navigator.vibrate) navigator.vibrate(8);
+}
+function closeTeamSheet(e) {
+  if (e && e.target !== e.currentTarget) return;
+  document.getElementById('teamSheet').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function switchTeam(team) {
+  if (team !== selectedTeam) {
+    selectedTeam = team;
+    saveTeam(team);
+    applyTeam();
+    lastHeroTheme = null;
+    updateHero();
+    buildWeekView();
+    buildPHPanel();
+    buildMonthView(true);
+    onDatePick(document.getElementById('datePicker').value);
+    if (navigator.vibrate) navigator.vibrate([10,40,10]);
+  }
+  closeTeamSheet();
+}
+
+// ── Service Worker ────────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  });
+}
+
+// ── PWA Install prompt ────────────────────────────────────────
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('installBanner').style.display = 'flex';
+});
+window.addEventListener('appinstalled', () => {
+  document.getElementById('installBanner').style.display = 'none';
+});
+function installApp() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(() => {
+      deferredPrompt = null;
+      document.getElementById('installBanner').style.display = 'none';
+    });
+  }
+}
+</script>
+
+<div id="installBanner" style="display:none;position:fixed;bottom:0;left:0;right:0;max-width:430px;margin:0 auto;background:#1c1c1e;border-top:1px solid rgba(255,255,255,0.08);padding:12px 16px 28px;align-items:center;justify-content:space-between;z-index:300;">
+  <div>
+    <div style="font-size:13px;font-weight:500;color:#e1e1e1;">&#x26F4;&#xFE0F; Install Shift Tracker</div>
+    <div style="font-size:11px;color:#9da0a8;margin-top:2px;">Add to home screen for the full app experience</div>
+  </div>
+  <button onclick="installApp()" style="padding:8px 18px;border-radius:20px;border:none;background:#03a9f4;color:#fff;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0;margin-left:12px;">Install</button>
+</div>
+</body>
+</html>
