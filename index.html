@@ -919,8 +919,11 @@ body {
 /* Events: tap to mark as read */
 .ev-card { cursor:pointer; -webkit-tap-highlight-color:transparent; transition: opacity .25s ease, transform .15s ease; }
 .ev-card:active { transform: scale(.985); }
-.ev-card.ev-read { opacity:.55; }
 .ev-card.ev-read .ev-chip-new { display:none; }
+.ev-card .ph-card-body { flex-direction:row; align-items:center; gap:12px; }
+.ev-main { flex:1; min-width:0; display:flex; flex-direction:column; gap:3px; }
+.ev-icon { flex-shrink:0; width:38px; height:38px; border-radius:11px; display:flex; align-items:center; justify-content:center; }
+.ev-foot { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
 
 /* Month view: month name and Plan leave on one line, centred between the arrows */
 .month-view .month-nav-row { margin-top:0; margin-bottom:10px; gap:8px; }
@@ -2030,11 +2033,10 @@ function updateEventsDot() {
 function toggleEventRead(card) {
   const key = card.dataset.evkey;
   if (!key) return;
-  if (eventsRead.has(key)) eventsRead.delete(key); else eventsRead.add(key);
+  if (eventsRead.has(key)) return;            // already read: nothing happens (for now)
+  eventsRead.add(key);
   saveEventsRead();
-  const read = eventsRead.has(key);
-  card.classList.toggle('ev-read', read);
-  card.setAttribute('aria-pressed', read ? 'true' : 'false');
+  card.classList.add('ev-read');
   updateEventsDot();
   if (navigator.vibrate) navigator.vibrate(8);
 }
@@ -2047,6 +2049,40 @@ document.addEventListener('keydown', e => {
   const card = e.target.closest && e.target.closest('#eventsPanel .ev-card');
   if (card) { e.preventDefault(); toggleEventRead(card); }
 });
+
+const EVENT_ICONS = {
+  sport:'<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/>',
+  union:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6 6 0 0 1 3.5 6"/>',
+  social:'<path d="M12 22a7 7 0 0 0 7-7c0-4-3-6.5-4-9.5-1 2.5-2.5 3.5-4 4 0-2-1-4-2.5-5.5C8 7 5 10 5 15a7 7 0 0 0 7 7z"/>',
+  work:'<path d="M2 18h20"/><path d="M4 18v-2a8 8 0 0 1 16 0v2"/><path d="M10 6V4h4v2M9 8v5M15 8v5"/>',
+  safety:'<path d="M12 2l8 3v6c0 5-3.5 9-8 11-4.5-2-8-6-8-11V5z"/><path d="M12 8v5M12 16h.01"/>',
+  training:'<path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c3 2 9 2 12 0v-5M22 9v6"/>',
+  celebration:'<rect x="3" y="8" width="18" height="13" rx="2"/><path d="M3 12h18M12 8v13M12 8c-2-4-6-4-6-1.5S10 8 12 8zM12 8c2-4 6-4 6-1.5S14 8 12 8z"/>',
+  notice:'<path d="M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1z"/><path d="M15 9a4 4 0 0 1 0 6M18 6a8 8 0 0 1 0 12"/>',
+  roadshow:'<rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M12 16v4M8 20h8M7 12l3-3 2 2 4-4"/>',
+  wellness:'<path d="M4 4v6a5 5 0 0 0 10 0V4M4 4h2M12 4h2M9 15v1a5 5 0 0 0 10 0v-3"/><circle cx="19" cy="11" r="2"/>',
+  yearend:'<path d="M4 21l5-14 8 8z"/><path d="M14 3c0 2 1 3 3 3M19 8h2M16 2v2M21 13c-2-1-4 0-4 0M12 6c1-1 1-2 0-3"/>',
+  longservice:'<rect x="3" y="4" width="18" height="13" rx="1.5"/><path d="M7 8h10M7 11h6"/><circle cx="16" cy="15" r="2.5"/><path d="M14.8 17.2L14 21l2-1 2 1-.8-3.8"/>'
+};
+// Spaces, dashes and underscores are ignored, so "year-end", "year_end" and "Year End" all match yearend
+const EVENT_ICON_ALIASES = { sports:'sport', braai:'social', party:'celebration', meeting:'union', unionmeeting:'union', notices:'notice', announcement:'notice',
+  wellnessday:'wellness', yearendparty:'yearend', endofyear:'yearend', longserviceaward:'longservice', longserviceawards:'longservice' };
+function evCategory(ev) {
+  const c = String(ev.category || '').trim().toLowerCase().replace(/[\s_-]+/g, '');
+  const k = EVENT_ICON_ALIASES[c] || c;
+  return EVENT_ICONS[k] ? k : 'notice';
+}
+// Strip + icon colour comes from the type of event; priority "urgent" overrides it with red
+const EVENT_GROUP_COLOUR = {
+  sport:'#f06292', social:'#f06292', yearend:'#f06292', celebration:'#f06292',      // social & sport
+  safety:'#FF5252', wellness:'#FF5252',                                              // health & safety
+  union:'#FFC107',                                                                   // union
+  work:'#4fc3f7', roadshow:'#4fc3f7', training:'#4fc3f7', longservice:'#4fc3f7', notice:'#4fc3f7'   // company
+};
+function evColour(ev) { return ev.priority === 'urgent' ? EVENT_ACCENT.urgent : EVENT_GROUP_COLOUR[evCategory(ev)]; }
+function evIconSvg(ev, colour) {
+  return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="${colour}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${EVENT_ICONS[evCategory(ev)]}</svg>`;
+}
 
 function evIsoDate(v) { return (typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v)) ? v : null; }
 function evIsNew(ev) {
@@ -2091,7 +2127,7 @@ function buildEventsPanel() {
     panel.innerHTML = title + '<div class="ph-empty">No active events</div>';
   } else {
     panel.innerHTML = title + list.map((ev, i) => {
-      const pr = EVENT_ACCENT[ev.priority] ? ev.priority : 'info';
+      const pr = ev.priority === 'urgent' ? 'urgent' : 'info', col = evColour(ev);
       const date = evIsoDate(ev.date);
       let dateChip = '';
       if (date) {
@@ -2103,15 +2139,15 @@ function buildEventsPanel() {
       const ct = Date.parse(ev.created);
       const posted = isNaN(ct) ? '' : ` · posted ${new Date(ct).getDate()} ${MONTH_NAMES[new Date(ct).getMonth()].slice(0,3)}`;
       const read = evIsRead(ev);
-      return `<div class="ph-card ev-card${read ? ' ev-read' : ''}" data-evkey="${evEsc(evKey(ev))}" role="button" tabindex="0" aria-pressed="${read}" aria-label="${evEsc(ev.title || 'Notice')} (tap to mark read or unread)" style="animation-delay:${i*50}ms">
-        <div class="ph-card-accent" style="background:${EVENT_ACCENT[pr]}"></div>
+      return `<div class="ph-card ev-card${read ? ' ev-read' : ''}" data-evkey="${evEsc(evKey(ev))}" role="button" tabindex="0" aria-label="${evEsc(ev.title || 'Notice')}" style="animation-delay:${i*50}ms">
+        <div class="ph-card-accent" style="background:${col}"></div>
         <div class="ph-card-body">
-          <div class="ev-top">
+          <div class="ev-main">
             <div class="ev-title">${dateChip}${evEsc(ev.title || '')}${pr === 'urgent' ? '<span class="ev-chip ev-chip-urgent">Urgent</span>' : ''}${evIsNew(ev) ? '<span class="ev-chip ev-chip-new">New</span>' : ''}</div>
-            ${teamChip}
+            ${ev.body ? `<div class="ev-body">${evEsc(ev.body)}</div>` : ''}
+            <div class="ev-foot">${evEsc(ev.posted_by || 'Omuhle')}${posted}${teamChip}</div>
           </div>
-          ${ev.body ? `<div class="ev-body">${evEsc(ev.body)}</div>` : ''}
-          <div class="ev-foot">${evEsc(ev.posted_by || 'Omuhle')}${posted}</div>
+          <div class="ev-icon" style="background:${col}1f">${evIconSvg(ev, col)}</div>
         </div>
       </div>`;
     }).join('');
