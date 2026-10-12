@@ -901,6 +901,21 @@ body {
 .brand-corner { position:absolute; top:max(env(safe-area-inset-top,0px),22px); left:22px; }
 .brand-corner img { display:block; height:34px; width:auto; }
 
+/* Week view: Events / Notifications */
+.events-panel { margin-top:12px; }
+.ev-card .ph-card-body { flex-direction:column; align-items:stretch; gap:3px; }
+.ev-top { display:flex; align-items:flex-start; justify-content:space-between; gap:8px; }
+.ev-title { font-size:13px; font-weight:500; color:#e1e1e1; line-height:1.35; }
+.ev-chip { display:inline-block; padding:1px 6px; border-radius:20px; font-size:9px; font-weight:500; letter-spacing:.03em; vertical-align:2px; margin-left:4px; white-space:nowrap; }
+.ev-chip-date { background:rgba(255,255,255,.06); color:#c5c7cc; margin-left:0; margin-right:6px; }
+.ev-chip-urgent { background:rgba(255,82,82,.15); color:#FF5252; text-transform:uppercase; }
+.ev-chip-new { background:rgba(79,195,247,.14); color:#4fc3f7; text-transform:uppercase; animation: tick 2s ease-in-out infinite; }
+.ev-chip-team { background:rgba(255,255,255,.06); color:#9da0a8; flex-shrink:0; margin-left:0; }
+.ev-body { font-size:12px; color:#9da0a8; line-height:1.45; }
+.ev-foot { font-size:10px; color:#6b6e75; margin-top:2px; }
+.tab[data-tab="week"] { position:relative; }
+.tab[data-tab="week"].has-ev-dot::after { content:''; position:absolute; top:5px; right:10px; width:6px; height:6px; border-radius:50%; background:#FF5252; }
+
 /* Port tab opens MarineTraffic directly */
 a.tab-link { display:block; text-decoration:none; }
 
@@ -1097,6 +1112,7 @@ a.tab-link { display:block; text-decoration:none; }
   <div class="week-view active" id="weekView">
     <div class="week-scroll" id="weekScroll"></div>
     <div class="ph-panel" id="phPanel"></div>
+    <div class="events-panel" id="eventsPanel" style="display:none"></div>
   </div>
 
   <div class="month-view" id="monthView">
@@ -1294,6 +1310,7 @@ function confirmTeam() {
   buildWeekView();
   buildMonthView();
   buildPHPanel();
+  buildEventsPanel();
   onDatePick(document.getElementById('datePicker').value);
   if (!harbourData.updatedAt) fetchHarbourWeather();
   if (navigator.vibrate) navigator.vibrate([10,40,10]);
@@ -1735,6 +1752,7 @@ function switchTab(tab) {
   ['week','month','search'].forEach(v =>
     document.getElementById(v + 'View').classList.toggle('active', v === tab));
   if (tab==='month') buildMonthView();
+  if (tab==='week' && Date.now() - eventsFetchedAt > EVENTS_STALE_MS) loadEvents();
   if (tab==='search') {
     const t   = today0();
     const iso = `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`;
@@ -1960,6 +1978,114 @@ async function fetchHarbourWeather() {
   renderHarbourWeather();
 }
 
+// ── Events / Notifications (events.json, posted by Omuhle) ────
+const EVENTS_STALE_MS = 10 * 60 * 1000;
+const EVENTS_MAX = 8;
+const EVENT_ACCENT = { urgent:'#FF5252', important:'#FFC107', info:'#4fc3f7' };
+let eventsCache = null;          // parsed events.json, or null if not loaded
+let eventsFetchedAt = 0;
+// ?events=<url> override for testing — same site only, so outside files can't pose as notices
+let EVENTS_URL = 'events.json';
+try {
+  const o = new URLSearchParams(location.search).get('events');
+  if (o) {
+    const u = new URL(o, location.href);
+    if (u.origin === location.origin) EVENTS_URL = u.href;
+    else console.warn('Events: ignoring ?events= from another site');
+  }
+} catch (e) { console.warn('Events: bad ?events= value'); }
+
+function evEsc(v) {
+  return String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function evIsoDate(v) { return (typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v)) ? v : null; }
+function evIsNew(ev) {
+  const t = Date.parse(ev.created);
+  return !isNaN(t) && Date.now() - t < 48 * 3600 * 1000 && Date.now() - t > -3600 * 1000;
+}
+function evTeams(ev) {
+  if (!Array.isArray(ev.teams)) return null;          // "all", null or missing → everyone
+  return ev.teams.map(t => String(t).trim().toUpperCase()).filter(t => /^[ABCD]$/.test(t));
+}
+function visibleEvents() {
+  if (!eventsCache || !Array.isArray(eventsCache.events) || !selectedTeam) return [];
+  const today = dateKey(today0()), until = dateKey(addDays(today0(), 30));
+  const list = eventsCache.events.filter(ev => {
+    if (!ev || typeof ev !== 'object') return false;
+    if (!String(ev.title || '').trim() && !String(ev.body || '').trim()) return false;   // skip blank entries
+    const teams = evTeams(ev);
+    if (teams && !teams.includes(selectedTeam)) return false;
+    const exp = evIsoDate(ev.expires);
+    if (exp && today > exp) return false;
+    const date = evIsoDate(ev.date);
+    if (date && (date < today || date > until)) return false;
+    return true;
+  });
+  const created = ev => { const t = Date.parse(ev.created); return isNaN(t) ? 0 : t; };
+  const undated = list.filter(ev => !evIsoDate(ev.date)).sort((a, b) => created(b) - created(a));
+  const dated = list.filter(ev => evIsoDate(ev.date)).sort((a, b) => evIsoDate(a.date) < evIsoDate(b.date) ? -1 : evIsoDate(a.date) > evIsoDate(b.date) ? 1 : 0);
+  return undated.concat(dated).slice(0, EVENTS_MAX);
+}
+function buildEventsPanel() {
+  const panel = document.getElementById('eventsPanel');
+  const weekTab = document.querySelector('.tab[data-tab="week"]');
+  if (!panel) return;
+  if (!eventsCache || !selectedTeam) {
+    panel.style.display = 'none';
+    if (weekTab) weekTab.classList.remove('has-ev-dot');
+    return;
+  }
+  const list = visibleEvents();
+  const title = '<div class="ph-panel-title">Events / Notifications</div>';
+  if (!list.length) {
+    panel.innerHTML = title + '<div class="ph-empty">No active events</div>';
+  } else {
+    panel.innerHTML = title + list.map((ev, i) => {
+      const pr = EVENT_ACCENT[ev.priority] ? ev.priority : 'info';
+      const date = evIsoDate(ev.date);
+      let dateChip = '';
+      if (date) {
+        const [y, m, d] = date.split('-').map(Number), dt = new Date(y, m - 1, d);
+        dateChip = `<span class="ev-chip ev-chip-date">${DAY_NAMES[dt.getDay()]} ${dt.getDate()} ${MONTH_NAMES[dt.getMonth()].slice(0,3)}</span>`;
+      }
+      const teams = evTeams(ev);
+      const teamChip = teams && teams.length ? `<span class="ev-chip ev-chip-team">Team ${teams.join('+')}</span>` : '';
+      const ct = Date.parse(ev.created);
+      const posted = isNaN(ct) ? '' : ` · posted ${new Date(ct).getDate()} ${MONTH_NAMES[new Date(ct).getMonth()].slice(0,3)}`;
+      return `<div class="ph-card ev-card" style="animation-delay:${i*50}ms">
+        <div class="ph-card-accent" style="background:${EVENT_ACCENT[pr]}"></div>
+        <div class="ph-card-body">
+          <div class="ev-top">
+            <div class="ev-title">${dateChip}${evEsc(ev.title || '')}${pr === 'urgent' ? '<span class="ev-chip ev-chip-urgent">Urgent</span>' : ''}${evIsNew(ev) ? '<span class="ev-chip ev-chip-new">New</span>' : ''}</div>
+            ${teamChip}
+          </div>
+          ${ev.body ? `<div class="ev-body">${evEsc(ev.body)}</div>` : ''}
+          <div class="ev-foot">${evEsc(ev.posted_by || 'Omuhle')}${posted}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+  panel.style.display = '';
+  // Red dot on the Week tab when there's anything urgent or new for this team
+  if (weekTab) weekTab.classList.toggle('has-ev-dot', list.some(ev => ev.priority === 'urgent' || evIsNew(ev)));
+}
+async function loadEvents() {
+  eventsFetchedAt = Date.now();
+  try {
+    const u = new URL(EVENTS_URL, location.href);
+    u.searchParams.set('t', Date.now());
+    const res = await fetch(u.href, { cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    if (!data || typeof data !== 'object' || !Array.isArray(data.events)) throw new Error('unexpected format');
+    eventsCache = data;
+  } catch (e) {
+    console.warn('Events not loaded:', e && e.message ? e.message : e);
+    eventsCache = null;
+  }
+  buildEventsPanel();
+}
+
 // ── Init ──────────────────────────────────────────────────────
 const saved = getTeam();
 if (saved) {
@@ -1970,6 +2096,7 @@ if (saved) {
   updateHero();
   buildWeekView();
   buildPHPanel();
+  buildEventsPanel();
 
   let harbourCached = null;
   try { harbourCached = JSON.parse(localStorage.getItem(HARBOUR_CACHE_KEY)); } catch(e) {}
@@ -1985,6 +2112,7 @@ if (saved) {
 } else {
   document.getElementById('app').style.display = 'none';
 }
+loadEvents();
 
 setInterval(()=>{
   setCountdown(fmtCountdown(nextChange(new Date())-new Date()));
@@ -2016,6 +2144,7 @@ function switchTeam(team) {
     updateHero();
     buildWeekView();
     buildPHPanel();
+    buildEventsPanel();
     buildMonthView(true);
     onDatePick(document.getElementById('datePicker').value);
     if (navigator.vibrate) navigator.vibrate([10,40,10]);
