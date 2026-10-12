@@ -916,6 +916,21 @@ body {
 .tab[data-tab="week"] { position:relative; }
 .tab[data-tab="week"].has-ev-dot::after { content:''; position:absolute; top:5px; right:10px; width:6px; height:6px; border-radius:50%; background:#FF5252; }
 
+/* Events: tap to mark as read */
+.ev-card { cursor:pointer; -webkit-tap-highlight-color:transparent; transition: opacity .25s ease, transform .15s ease; }
+.ev-card:active { transform: scale(.985); }
+.ev-card.ev-read { opacity:.55; }
+.ev-card.ev-read .ev-chip-new { display:none; }
+
+/* Month view: month name and Plan leave on one line, centred between the arrows */
+.month-view .month-nav-row { margin-top:0; margin-bottom:10px; gap:8px; }
+.month-center { flex:1; min-width:0; display:flex; align-items:center; justify-content:center; gap:10px; }
+.month-center .month-title { font-size:15px; white-space:nowrap; }
+.month-center .leave-toggle { padding:6px 12px; white-space:nowrap; flex-shrink:0; }
+.month-view .leave-bar { min-height:0; margin:0 0 6px; }
+.month-view .leave-bar:not(:has(.leave-clear.show)) { display:none; }
+.month-view .leave-hint.show { margin:0 2px 10px; }
+
 /* Port tab opens MarineTraffic directly */
 a.tab-link { display:block; text-decoration:none; }
 
@@ -1118,11 +1133,13 @@ a.tab-link { display:block; text-decoration:none; }
   <div class="month-view" id="monthView">
     <div class="month-nav-row">
       <button class="nav-btn" onclick="changeMonth(-1)" aria-label="Previous month"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
-      <div class="month-title" id="monthTitle"></div>
+      <div class="month-center">
+        <div class="month-title" id="monthTitle"></div>
+        <button class="leave-toggle" id="leaveToggle" onclick="toggleLeaveMode()">Plan leave</button>
+      </div>
       <button class="nav-btn" onclick="changeMonth(1)" aria-label="Next month"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></button>
     </div>
     <div class="leave-bar">
-      <button class="leave-toggle" id="leaveToggle" onclick="toggleLeaveMode()">Plan leave</button>
       <button class="leave-clear" id="leaveClear" onclick="clearMonthLeave()">Clear month</button>
     </div>
     <div class="leave-hint" id="leaveHint">Tap days to add or remove leave</div>
@@ -1998,6 +2015,39 @@ try {
 function evEsc(v) {
   return String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
+// Read marks are saved on this phone only (like leave), keyed by event id
+const EVENTS_READ_KEY = 'liteEventsRead';
+let eventsRead = new Set();
+try { eventsRead = new Set(JSON.parse(localStorage.getItem(EVENTS_READ_KEY) || '[]')); } catch (e) {}
+function saveEventsRead() { try { localStorage.setItem(EVENTS_READ_KEY, JSON.stringify([...eventsRead])); } catch (e) {} }
+function evKey(ev) { return ev.id != null && String(ev.id).trim() ? 'id:' + String(ev.id) : 'k:' + [ev.title, ev.created, ev.date].join('|'); }
+function evIsRead(ev) { return eventsRead.has(evKey(ev)); }
+function evNeedsAttention(ev) { return !evIsRead(ev) && (ev.priority === 'urgent' || evIsNew(ev)); }
+function updateEventsDot() {
+  const weekTab = document.querySelector('.tab[data-tab="week"]');
+  if (weekTab) weekTab.classList.toggle('has-ev-dot', !!eventsCache && visibleEvents().some(evNeedsAttention));
+}
+function toggleEventRead(card) {
+  const key = card.dataset.evkey;
+  if (!key) return;
+  if (eventsRead.has(key)) eventsRead.delete(key); else eventsRead.add(key);
+  saveEventsRead();
+  const read = eventsRead.has(key);
+  card.classList.toggle('ev-read', read);
+  card.setAttribute('aria-pressed', read ? 'true' : 'false');
+  updateEventsDot();
+  if (navigator.vibrate) navigator.vibrate(8);
+}
+document.addEventListener('click', e => {
+  const card = e.target.closest && e.target.closest('#eventsPanel .ev-card');
+  if (card) toggleEventRead(card);
+});
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Enter' && e.key !== ' ') return;
+  const card = e.target.closest && e.target.closest('#eventsPanel .ev-card');
+  if (card) { e.preventDefault(); toggleEventRead(card); }
+});
+
 function evIsoDate(v) { return (typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v)) ? v : null; }
 function evIsNew(ev) {
   const t = Date.parse(ev.created);
@@ -2052,7 +2102,8 @@ function buildEventsPanel() {
       const teamChip = teams && teams.length ? `<span class="ev-chip ev-chip-team">Team ${teams.join('+')}</span>` : '';
       const ct = Date.parse(ev.created);
       const posted = isNaN(ct) ? '' : ` · posted ${new Date(ct).getDate()} ${MONTH_NAMES[new Date(ct).getMonth()].slice(0,3)}`;
-      return `<div class="ph-card ev-card" style="animation-delay:${i*50}ms">
+      const read = evIsRead(ev);
+      return `<div class="ph-card ev-card${read ? ' ev-read' : ''}" data-evkey="${evEsc(evKey(ev))}" role="button" tabindex="0" aria-pressed="${read}" aria-label="${evEsc(ev.title || 'Notice')} (tap to mark read or unread)" style="animation-delay:${i*50}ms">
         <div class="ph-card-accent" style="background:${EVENT_ACCENT[pr]}"></div>
         <div class="ph-card-body">
           <div class="ev-top">
@@ -2067,7 +2118,7 @@ function buildEventsPanel() {
   }
   panel.style.display = '';
   // Red dot on the Week tab when there's anything urgent or new for this team
-  if (weekTab) weekTab.classList.toggle('has-ev-dot', list.some(ev => ev.priority === 'urgent' || evIsNew(ev)));
+  if (weekTab) weekTab.classList.toggle('has-ev-dot', list.some(evNeedsAttention));
 }
 async function loadEvents() {
   eventsFetchedAt = Date.now();
@@ -2079,6 +2130,10 @@ async function loadEvents() {
     const data = await res.json();
     if (!data || typeof data !== 'object' || !Array.isArray(data.events)) throw new Error('unexpected format');
     eventsCache = data;
+    const live = new Set(data.events.filter(ev => ev && typeof ev === 'object').map(evKey));
+    const before = eventsRead.size;
+    eventsRead.forEach(k => { if (!live.has(k)) eventsRead.delete(k); });
+    if (eventsRead.size !== before) saveEventsRead();
   } catch (e) {
     console.warn('Events not loaded:', e && e.message ? e.message : e);
     eventsCache = null;
