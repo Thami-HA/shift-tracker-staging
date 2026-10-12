@@ -1,7 +1,19 @@
 {
   "schema": 1,
-  "updated": "2026-10-12T19:05:00+02:00",
+  "updated": "2026-10-12T21:12:03+02:00",
   "events": [
+    {
+      "id": "evt-20261012-211203",
+      "title": "Sports Day — Richards Bay",
+      "body": "Company Sports Day at Richards Bay on Saturday 31 October. Departure time and full details still to be confirmed — updates will be posted here.",
+      "teams": "all",
+      "priority": "info",
+      "date": "2026-10-31",
+      "expires": "2026-11-01",
+      "created": "2026-10-12T21:12:03+02:00",
+      "posted_by": "Omuhle",
+      "category": "sport"
+    },
     {
       "id": "evt-20261012-001",
       "title": "Safety briefing — Friday 08:00, Control Room",
