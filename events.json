@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "updated": "2026-10-12T16:12:23+02:00",
+  "updated": "2026-10-12T19:05:00+02:00",
   "events": [
     {
       "id": "evt-20261012-001",
@@ -11,7 +11,8 @@
       "date": "2026-10-16",
       "expires": "2026-10-17",
       "created": "2026-10-12T18:00:00+02:00",
-      "posted_by": "Omuhle"
+      "posted_by": "Omuhle",
+      "category": "safety"
     },
     {
       "id": "evt-20261012-002",
@@ -24,7 +25,8 @@
       "date": null,
       "expires": "2026-10-22",
       "created": "2026-10-12T17:45:00+02:00",
-      "posted_by": "Omuhle"
+      "posted_by": "Omuhle",
+      "category": "work"
     },
     {
       "id": "evt-20261012-003",
@@ -35,7 +37,8 @@
       "date": null,
       "expires": "2026-10-27",
       "created": "2026-10-12T17:30:00+02:00",
-      "posted_by": "Omuhle"
+      "posted_by": "Omuhle",
+      "category": "work"
     },
     {
       "id": "evt-20261012-004",
@@ -48,7 +51,8 @@
       "date": null,
       "expires": "2026-10-21",
       "created": "2026-10-12T17:00:00+02:00",
-      "posted_by": "Omuhle"
+      "posted_by": "Omuhle",
+      "category": "work"
     },
     {
       "id": "evt-20261010-009",
