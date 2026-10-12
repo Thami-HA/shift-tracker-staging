@@ -1,7 +1,29 @@
 {
   "schema": 1,
-  "updated": "2026-10-12T18:00:00+02:00",
+  "updated": "2026-10-12T16:11:23+02:00",
   "events": [
+    {
+      "id": "evt-20261012-161123",
+      "title": "Pipeline smoke test",
+      "body": "Posted by st_event.py — will be removed in a moment.",
+      "teams": "all",
+      "priority": "info",
+      "date": null,
+      "expires": null,
+      "created": "2026-10-12T16:11:23+02:00",
+      "posted_by": "Omuhle"
+    },
+    {
+      "id": "evt-20261012-161116",
+      "title": "Pipeline smoke test",
+      "body": "Posted by st_event.py — will be removed in a moment.",
+      "teams": "all",
+      "priority": "info",
+      "date": null,
+      "expires": null,
+      "created": "2026-10-12T16:11:16+02:00",
+      "posted_by": "Omuhle"
+    },
     {
       "id": "evt-20261012-001",
       "title": "Safety briefing — Friday 08:00, Control Room",
@@ -17,7 +39,9 @@
       "id": "evt-20261012-002",
       "title": "Tanker changeover — Berth 2",
       "body": "Product changeover Thursday 06:00. Standby crew to report to control room at shift start.",
-      "teams": ["D"],
+      "teams": [
+        "D"
+      ],
       "priority": "important",
       "date": null,
       "expires": "2026-10-22",
@@ -39,7 +63,9 @@
       "id": "evt-20261012-004",
       "title": "Team A — manifold inspection",
       "body": "Pre-inspection checklist sign-off before Wednesday shift end.",
-      "teams": ["A"],
+      "teams": [
+        "A"
+      ],
       "priority": "info",
       "date": null,
       "expires": "2026-10-21",
