@@ -1,7 +1,19 @@
 {
   "schema": 1,
-  "updated": "2026-10-14T12:38:23+02:00",
+  "updated": "2026-10-14T12:38:30+02:00",
   "events": [
+    {
+      "id": "evt-20261014-123830",
+      "title": "BTT Sports Day — Richards Bay",
+      "body": "Soccer & netball: BTT Durban vs BTT Richards Bay. Relays — Ladies' 800m (2 laps), Men's 1600m (2 laps). 09:00 at Umhlathuze Sports Complex Grounds, Richards Bay Central. Info: Mbali Gumede 035 797 6702 / mbalig@bidtanks.com",
+      "teams": "all",
+      "priority": "info",
+      "date": "2026-10-31",
+      "expires": "2026-11-01",
+      "created": "2026-10-14T12:38:30+02:00",
+      "posted_by": "Omuhle",
+      "category": "sport"
+    },
     {
       "id": "evt-20261012-001",
       "title": "Safety briefing — Friday 08:00, Control Room",
