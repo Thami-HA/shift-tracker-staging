@@ -1,7 +1,19 @@
 {
   "schema": 1,
-  "updated": "2026-10-15T12:48:21+02:00",
+  "updated": "2026-10-15T12:49:13+02:00",
   "events": [
+    {
+      "id": "evt-20261015-124913",
+      "title": "SHE Committee Q2 Meetings - Jan 2027",
+      "body": "A&B shift: Tue 12 Jan, 10h00-12h00. C&D shift: Fri 15 Jan, 10h00-12h00. Both: Microsoft Teams + Boardroom. Notify your appointed shift SHE rep; rep books completed and signed before the meeting and brought on the day; quarterly stats due by the 2nd day of the new quarter. Q3/Q4 dates TBC with the 2027 roster.",
+      "teams": "all",
+      "priority": "important",
+      "date": "2027-01-12",
+      "expires": "2027-01-16",
+      "created": "2026-10-15T12:49:13+02:00",
+      "posted_by": "Omuhle",
+      "category": "safety"
+    },
     {
       "id": "evt-20261015-124821",
       "title": "SHE Committee Meeting - A&B Shift",
