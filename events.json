@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "updated": "2026-10-15T12:49:13+02:00",
+  "updated": "2026-10-16T03:46:16+02:00",
   "events": [
     {
       "id": "evt-20261015-124913",
@@ -40,18 +40,6 @@
       "created": "2026-10-14T12:38:30+02:00",
       "posted_by": "Omuhle",
       "category": "sport"
-    },
-    {
-      "id": "evt-20261012-001",
-      "title": "Safety briefing — Friday 08:00, Control Room",
-      "body": "Attendance compulsory for all Island View berth staff. Fire drill follows the briefing.",
-      "teams": "all",
-      "priority": "urgent",
-      "date": "2026-10-16",
-      "expires": "2026-10-17",
-      "created": "2026-10-12T18:00:00+02:00",
-      "posted_by": "Omuhle",
-      "category": "safety"
     },
     {
       "id": "evt-20261012-002",
