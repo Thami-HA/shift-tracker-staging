@@ -733,7 +733,7 @@ body {
 }
 .cal-wrap.leave-mode .cal-cell.is-leave .cal-shift-label { color:#f3e5f5 !important; }
 .cal-cell.is-leave .cal-shift-label { color:#ce93d8 !important; font-weight:700; }
-.legend-lv { font-size:7px; font-weight:700; letter-spacing:.04em; color:#ce93d8; }
+.legend-lv { font-size:9px; font-weight:700; letter-spacing:.04em; color:#ce93d8; }
 .cal-wrap.leave-mode .cal-cell.is-leave-free { outline: 1.5px dashed rgba(186,104,200,.6); outline-offset:-4px; }
 .cal-cell.just-toggled { animation: popIn .3s cubic-bezier(.3,1.6,.5,1); }
 .cal-wrap.leave-mode { box-shadow: 0 0 0 1.5px rgba(186,104,200,.55), 0 12px 32px -10px rgba(171,71,188,.45); }
@@ -1145,7 +1145,7 @@ a.tab-link { display:block; text-decoration:none; }
 
   <div class="week-view active" id="weekView">
     <div class="week-scroll" id="weekScroll"></div>
-    <div class="ph-panel" id="phPanel"></div>
+    <div class="ph-panel" id="phPanel" style="display:none"></div>
     <div class="events-panel" id="eventsPanel" style="display:none"></div>
   </div>
 
@@ -1176,8 +1176,9 @@ a.tab-link { display:block; text-decoration:none; }
       <div class="legend-item"><div class="legend-dot" style="background:var(--shift-day)"></div>Day</div>
       <div class="legend-item"><div class="legend-dot" style="background:var(--shift-standby)"></div>Standby</div>
       <div class="legend-item"><div class="legend-dot" style="background:var(--shift-rest)"></div>Rest</div>
-      <div class="legend-item"><span class="legend-lv">LEAVE</span>Leave</div>
+      
       <div class="legend-item"><div class="legend-dot" style="background:#FFC107"></div>Holiday</div>
+      <div class="legend-item"><span class="legend-lv">LEAVE</span></div>
     </div>
     <div id="leaveSummary"></div>
     <div id="monthHolidays"></div>
@@ -1626,12 +1627,20 @@ function buildLeaveSummary() {
   }
   const fmt = d => `${DAY_NAMES[d.getDay()]} ${d.getDate()} ${MONTH_NAMES[d.getMonth()].slice(0,3)}`;
   const plural = n => `${n} leave day${n===1?'':'s'}`;
-  el.innerHTML = title + `<div class="leave-card">
-    ${shown.map(b => `<div class="leave-range">
-      <div class="lr-dates">${b.start.getTime()===b.end.getTime() ? fmt(b.start) : fmt(b.start) + ' – ' + fmt(b.end)}</div>
-      <div class="lr-meta">${plural(b.used)}</div>
-    </div>`).join('')}
-  </div>`;
+  el.innerHTML = title + shown.map((b, i) => {
+    const days = Math.round((b.end - b.start) / 864e5) + 1;
+    return `<div class="ph-card lv-tile" style="animation-delay:${i*50}ms">
+      <div class="ph-card-accent" style="background:#ab47bc"></div>
+      <div class="ph-card-body">
+        <div class="ph-ic" style="background:#ab47bc26;color:#ce93d8">${svgIcon('suitcase', 17)}</div>
+        <div class="ph-card-left">
+          <div class="ph-card-name">${b.start.getTime()===b.end.getTime() ? fmt(b.start) : fmt(b.start) + ' – ' + fmt(b.end)}</div>
+          <div class="ph-card-date">${days} day${days===1?'':'s'} away from work</div>
+        </div>
+        <div class="ph-card-right"><div class="ph-hours-val" style="color:#ce93d8">${b.used}</div><div class="ph-hours-detail">leave day${b.used===1?'':'s'}</div></div>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 function buildMonthHolidays() {
@@ -2226,14 +2235,18 @@ function buildEventsPanel() {
   const panel = document.getElementById('eventsPanel');
   const weekTab = document.querySelector('.tab[data-tab="week"]');
   if (!panel) return;
-  const specials = selectedTeam ? upcomingSpecialDays() : [];
+  const specials = selectedTeam ? upcomingSpecialDays().concat(getHolidaysInRange(today0(), 7).map(ph => {
+    const { hours, shift } = calcPHHours(ph.date);
+    const foot = isLeave(ph.date) && leaveCosts(shift) ? 'Public holiday · on leave' : `Public holiday · ${shift} · ${hours} hour${hours===1?'':'s'}`;
+    return { date: ph.date, sd: { name: ph.name, colour: '#FFC107', icon: HOLIDAY_ICONS[ph.name] || ICON_PATHS.flag, foot } };
+  })).sort((a, b) => a.date - b.date) : [];
   if ((!eventsCache && !specials.length) || !selectedTeam) {
     panel.style.display = 'none';
     if (weekTab) weekTab.classList.remove('has-ev-dot');
     return;
   }
   const list = visibleEvents();
-  const title = '<div class="ph-panel-title">Events / Notifications</div>';
+  const title = '<div class="ph-panel-title">Coming up</div>';
   if (!list.length && !specials.length) {
     panel.innerHTML = title + '<div class="ph-empty">No active events</div>';
   } else {
@@ -2242,6 +2255,7 @@ function buildEventsPanel() {
         <div class="ph-card-body">
           <div class="ev-main">
             <div class="ev-title"><span class="ev-chip ev-chip-date">${DAY_NAMES[date.getDay()]} ${date.getDate()} ${MONTH_NAMES[date.getMonth()].slice(0,3)}</span>${sd.name}</div>
+            ${sd.foot ? `<div class="ev-foot">${sd.foot}</div>` : ''}
           </div>
           <div class="ev-icon" style="background:${sd.colour}1f"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="${sd.colour}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${sd.icon}</svg></div>
         </div>
