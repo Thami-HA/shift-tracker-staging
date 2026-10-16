@@ -1,11 +1,11 @@
 {
   "schema": 1,
-  "updated": "2026-10-16T03:46:28+02:00",
+  "updated": "2026-10-16T04:22:22+02:00",
   "events": [
     {
       "id": "evt-20261015-124913",
       "title": "SHE Committee Q2 Meetings - Jan 2027",
-      "body": "A&B shift: Tue 12 Jan, 10h00-12h00. C&D shift: Fri 15 Jan, 10h00-12h00. Both: Microsoft Teams + Boardroom. Notify your appointed shift SHE rep; rep books completed and signed before the meeting and brought on the day; quarterly stats due by the 2nd day of the new quarter. Q3/Q4 dates TBC with the 2027 roster.",
+      "body": "Teams + Boardroom · both 10h00 · A&B Tue 12 Jan, C&D Fri 15 Jan · Contact your shift SHE rep",
       "teams": "all",
       "priority": "important",
       "date": "2027-01-12",
@@ -17,7 +17,7 @@
     {
       "id": "evt-20261015-124821",
       "title": "SHE Committee Meeting - A&B Shift",
-      "body": "Q1 meeting, 10h00-12h00, Microsoft Teams + Boardroom. SHE REP books must be completed and signed (rep > line manager/Shift Supervisor > 16.2) BEFORE the meeting and brought on the day. Quarterly stats due by the 2nd day of the new quarter. Need rep books / near-miss books / T-shirts: see Terryl Tatchell (SHE Co-ordinator) before the meeting.",
+      "body": "Teams + Boardroom · 10h00–12h00 · Bring signed rep books · Terryl Tatchell (SHE Co-ord)",
       "teams": [
         "A",
         "B"
@@ -32,7 +32,7 @@
     {
       "id": "evt-20261014-123830",
       "title": "BTT Sports Day — Richards Bay",
-      "body": "Soccer & netball: BTT Durban vs BTT Richards Bay. Relays — Ladies' 800m (2 laps), Men's 1600m (2 laps). 09:00 at Umhlathuze Sports Complex Grounds, Richards Bay Central. Info: Mbali Gumede 035 797 6702 / mbalig@bidtanks.com",
+      "body": "Umhlathuze Sports Complex, RB Central · 09:00 · Mbali Gumede 035 797 6702",
       "teams": "all",
       "priority": "info",
       "date": "2026-10-31",
