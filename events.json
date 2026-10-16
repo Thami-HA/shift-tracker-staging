@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "updated": "2026-10-16T03:46:25+02:00",
+  "updated": "2026-10-16T03:46:28+02:00",
   "events": [
     {
       "id": "evt-20261015-124913",
@@ -40,20 +40,6 @@
       "created": "2026-10-14T12:38:30+02:00",
       "posted_by": "Omuhle",
       "category": "sport"
-    },
-    {
-      "id": "evt-20261012-004",
-      "title": "Team A — manifold inspection",
-      "body": "Pre-inspection checklist sign-off before Wednesday shift end.",
-      "teams": [
-        "A"
-      ],
-      "priority": "info",
-      "date": null,
-      "expires": "2026-10-21",
-      "created": "2026-10-12T17:00:00+02:00",
-      "posted_by": "Omuhle",
-      "category": "work"
     },
     {
       "id": "evt-20261010-009",
