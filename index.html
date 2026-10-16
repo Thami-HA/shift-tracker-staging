@@ -613,6 +613,8 @@ body {
   font-weight: 500; letter-spacing: 0.03em; text-transform: uppercase;
 }
 .ph-card-right { text-align: right; flex-shrink: 0; }
+.ph-ic { flex-shrink:0; width:32px; height:32px; border-radius:10px; display:flex; align-items:center; justify-content:center; background:#FFC1071f; }
+.ph-card-left { flex:1; min-width:0; }
 .ph-hours-val {
   font-family: 'Roboto Mono', monospace; font-size: 18px;
   font-weight: 400; color: #e1e1e1; line-height: 1; margin-bottom: 2px;
@@ -730,10 +732,8 @@ body {
   box-shadow: inset 0 0 0 1.5px rgba(186,104,200,.75);
 }
 .cal-wrap.leave-mode .cal-cell.is-leave .cal-shift-label { color:#f3e5f5 !important; }
-.cal-cell.is-leave .cal-shift-label { color:#ce93d8 !important; }
-/* Confirmed leave: quiet purple dot in the corner, like holidays and events; hidden while planning (stripes show instead) */
-.ev-cell-dots i.lv-dot { background:#ce93d8; }
-.cal-wrap.leave-mode .ev-cell-dots i.lv-dot { display:none; }
+.cal-cell.is-leave .cal-shift-label { color:#ce93d8 !important; font-weight:700; }
+.legend-lv { font-size:7px; font-weight:700; letter-spacing:.04em; color:#ce93d8; }
 .cal-wrap.leave-mode .cal-cell.is-leave-free { outline: 1.5px dashed rgba(186,104,200,.6); outline-offset:-4px; }
 .cal-cell.just-toggled { animation: popIn .3s cubic-bezier(.3,1.6,.5,1); }
 .cal-wrap.leave-mode { box-shadow: 0 0 0 1.5px rgba(186,104,200,.55), 0 12px 32px -10px rgba(171,71,188,.45); }
@@ -935,6 +935,8 @@ body {
 .ev-card:active { transform: scale(.985); }
 .ev-card.ev-read .ev-chip-new { display:none; }
 .ev-card .ph-card-body { flex-direction:row; align-items:center; gap:12px; }
+.ev-card.ev-special { cursor:default; }
+.ev-card.ev-special:active { transform:none; }
 .ev-main { flex:1; min-width:0; display:flex; flex-direction:column; gap:3px; }
 .ev-icon { flex-shrink:0; width:38px; height:38px; border-radius:11px; display:flex; align-items:center; justify-content:center; }
 .ev-foot { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
@@ -1174,7 +1176,7 @@ a.tab-link { display:block; text-decoration:none; }
       <div class="legend-item"><div class="legend-dot" style="background:var(--shift-day)"></div>Day</div>
       <div class="legend-item"><div class="legend-dot" style="background:var(--shift-standby)"></div>Standby</div>
       <div class="legend-item"><div class="legend-dot" style="background:var(--shift-rest)"></div>Rest</div>
-      <div class="legend-item"><div class="legend-dot legend-leave"></div>Leave</div>
+      <div class="legend-item"><span class="legend-lv">LEAVE</span>Leave</div>
       <div class="legend-item"><div class="legend-dot" style="background:#FFC107"></div>Holiday</div>
     </div>
     <div id="leaveSummary"></div>
@@ -1650,6 +1652,7 @@ function buildMonthHolidays() {
     return `<div class="ph-card" style="animation-delay:${i*50}ms">
       <div class="ph-card-accent"></div>
       <div class="ph-card-body">
+        ${phTileIcon(ph.name)}
         <div class="ph-card-left">
           <div class="ph-card-name">${ph.name}${obsTag}</div>
           <div class="ph-card-date">${dateStr} &nbsp;·&nbsp; <span class="ph-shift-chip" style="${chipColor}">${shiftIcon(shift,10)} ${shift}</span></div>
@@ -1902,6 +1905,7 @@ function buildPHPanel() {
       return `<div class="ph-card">
         <div class="ph-card-accent"></div>
         <div class="ph-card-body">
+          ${phTileIcon(ph.name)}
           <div class="ph-card-left">
             <div class="ph-card-name">${ph.name}${obsTag}</div>
             <div class="ph-card-date">${dateStr} &nbsp;·&nbsp; <span class="ph-shift-chip" style="${chipColor}">${shiftIcon(shift,10)} ${shift}</span></div>
@@ -2128,6 +2132,16 @@ const SPECIAL_DAYS = [
 function nthSunday(y, m, n) { const first = new Date(y, m, 1); return new Date(y, m, 1 + (7 - first.getDay()) % 7 + 7 * (n - 1)); }
 function specialDayFor(d) { const key = dateKey(d); return SPECIAL_DAYS.find(sd => dateKey(sd.when(d.getFullYear())) === key) || null; }
 
+function phTileIcon(name) {
+  return `<div class="ph-ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#FFC107" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${HOLIDAY_ICONS[name] || ICON_PATHS.flag}</svg></div>`;
+}
+// Special days coming up in the next 7 days, for the Events list
+function upcomingSpecialDays() {
+  const out = [], t = today0();
+  for (let i = 0; i < 7; i++) { const d = addDays(t, i), sd = specialDayFor(d); if (sd) out.push({ sd, date: d }); }
+  return out;
+}
+
 function holidayNameFor(d) {
   const y = d.getFullYear(), key = dateKey(d);
   const ph = getHolidaysForYear(y).find(h => dateKey(getObservedDate(y, h.month, h.day)) === key);
@@ -2170,10 +2184,9 @@ function paintEventMarks() {
   document.querySelectorAll('#calGrid .cal-cell[data-key]').forEach(cell => {
     cell.querySelectorAll('.ev-cell-dots').forEach(n => n.remove());
     const list = byDay[cell.dataset.key] || [];
-    const leave = cell.classList.contains('is-leave');   // only days that use a leave day (Night/Day)
     const cols = [...new Set(list.map(evColour))].slice(0, 3);   // one dot per colour
-    if (!leave && !cols.length) return;
-    cell.insertAdjacentHTML('beforeend', `<div class="ev-cell-dots">${leave ? '<i class="lv-dot"></i>' : ''}${cols.map(c => `<i style="background:${c}"></i>`).join('')}</div>`);
+    if (!cols.length) return;
+    cell.insertAdjacentHTML('beforeend', `<div class="ev-cell-dots">${cols.map(c => `<i style="background:${c}"></i>`).join('')}</div>`);
   });
 }
 
@@ -2213,17 +2226,33 @@ function buildEventsPanel() {
   const panel = document.getElementById('eventsPanel');
   const weekTab = document.querySelector('.tab[data-tab="week"]');
   if (!panel) return;
-  if (!eventsCache || !selectedTeam) {
+  const specials = selectedTeam ? upcomingSpecialDays() : [];
+  if ((!eventsCache && !specials.length) || !selectedTeam) {
     panel.style.display = 'none';
     if (weekTab) weekTab.classList.remove('has-ev-dot');
     return;
   }
   const list = visibleEvents();
   const title = '<div class="ph-panel-title">Events / Notifications</div>';
-  if (!list.length) {
+  if (!list.length && !specials.length) {
     panel.innerHTML = title + '<div class="ph-empty">No active events</div>';
   } else {
+    const specialTile = ({ sd, date }) => `<div class="ph-card ev-card ev-special">
+        <div class="ph-card-accent" style="background:${sd.colour}"></div>
+        <div class="ph-card-body">
+          <div class="ev-main">
+            <div class="ev-title"><span class="ev-chip ev-chip-date">${DAY_NAMES[date.getDay()]} ${date.getDate()} ${MONTH_NAMES[date.getMonth()].slice(0,3)}</span>${sd.name}</div>
+          </div>
+          <div class="ev-icon" style="background:${sd.colour}1f"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="${sd.colour}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${sd.icon}</svg></div>
+        </div>
+      </div>`;
+    const pending = specials.slice();
     panel.innerHTML = title + list.map((ev, i) => {
+      // Slot special days in date order among the dated events
+      let pre = '';
+      const evDate = evIsoDate(ev.date);
+      if (evDate) while (pending.length && dateKey(pending[0].date) <= evDate) pre += specialTile(pending.shift());
+      return pre + (() => {
       const pr = ev.priority === 'urgent' ? 'urgent' : 'info', col = evColour(ev);
       const date = evIsoDate(ev.date);
       let dateChip = '';
@@ -2247,7 +2276,8 @@ function buildEventsPanel() {
           <div class="ev-icon" style="background:${col}1f">${evIconSvg(ev, col)}</div>
         </div>
       </div>`;
-    }).join('');
+      })();
+    }).join('') + pending.map(specialTile).join('');
   }
   panel.style.display = '';
   // Red dot on the Week tab when there's anything urgent or new for this team
