@@ -161,12 +161,6 @@ body {
   color: var(--ha-text-primary);
 }
 
-.header-sub {
-  font-size: 11px;
-  color: var(--ha-text-secondary);
-  margin-top: 1px;
-}
-
 .header-date {
   font-size: 13px;
   font-weight: 500;
@@ -415,7 +409,7 @@ body {
   transition: background 0.15s;
   -webkit-tap-highlight-color: transparent;
 }
-.nav-btn:hover  { background: var(--ha-card-bg2); }
+.nav-btn:hover { background: var(--ha-card-bg2); }
 .nav-btn:active { opacity: 0.7; }
 
 .cal-wrap {
@@ -456,11 +450,11 @@ body {
   position: relative;
 }
 .cal-cell:nth-child(7n) { border-right: none; }
-.cal-cell-empty   { background: transparent; }
-.cal-cell-Night   { background: rgba(61,90,254,0.12); }
-.cal-cell-Day     { background: rgba(255,143,0,0.12); }
+.cal-cell-empty { background: transparent; }
+.cal-cell-Night { background: rgba(61,90,254,0.12); }
+.cal-cell-Day { background: rgba(255,143,0,0.12); }
 .cal-cell-Standby { background: rgba(0,137,123,0.12); }
-.cal-cell-Rest    { background: rgba(67,160,71,0.12); }
+.cal-cell-Rest { background: rgba(67,160,71,0.12); }
 
 .cal-num {
   font-size: 11px;
@@ -570,24 +564,10 @@ body {
 .result-ph-row { display: flex; align-items: center; gap: 6px; margin-top: 10px; font-size: 12px; color: #FFC107; }
 
 /* ── Change team pill ─────────────────────────────────────── */
-.change-team-btn {
-  padding: 5px 12px;
-  border-radius: 20px;
-  border: 1px solid var(--ha-border);
-  background: var(--ha-card-bg2);
-  color: var(--ha-text-secondary);
-  font-size: 11px;
-  font-weight: 500;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  transition: background 0.15s;
-}
-.change-team-btn:active { background: var(--ha-border); }
 
 @keyframes fadeIn { from{opacity:0} to{opacity:1} }
 
 /* ── Public Holiday Panel ─────────────────────────────────── */
-.ph-panel { margin-top: 12px; }
 .ph-panel-title {
   font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
   text-transform: uppercase; color: #9da0a8;
@@ -638,11 +618,6 @@ body {
 
 /* ── Week card PH (B+C) ───────────────────────────────────── */
 
-.ph-card-dot {
-  position: absolute; top: 6px; right: 6px;
-  width: 6px; height: 6px; border-radius: 50%; background: #FFC107;
-}
-
 /* ══════════ v2 upgrade: depth, motion, icons, leave ══════════ */
 :root { --shift-leave:#ab47bc; --shift-leave-bg:rgba(171,71,188,0.15); --leave-soft:#ce93d8; }
 .ico { display:inline-block; vertical-align:-2px; flex-shrink:0; }
@@ -665,12 +640,12 @@ body {
   content:''; position:absolute; inset:0; pointer-events:none; border-radius:inherit;
   background: radial-gradient(circle at var(--gx,18%) var(--gy,0%), rgba(255,255,255,.07), transparent 55%);
 }
-.shift-Night .hero-card   { box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 12px 28px rgba(0,0,0,.45), 0 14px 44px -14px rgba(61,90,254,.4); }
-.shift-Day .hero-card     { box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 12px 28px rgba(0,0,0,.45), 0 14px 44px -14px rgba(255,143,0,.35); }
+.shift-Night .hero-card { box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 12px 28px rgba(0,0,0,.45), 0 14px 44px -14px rgba(61,90,254,.4); }
+.shift-Day .hero-card { box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 12px 28px rgba(0,0,0,.45), 0 14px 44px -14px rgba(255,143,0,.35); }
 .shift-Standby .hero-card { box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 12px 28px rgba(0,0,0,.45), 0 14px 44px -14px rgba(0,137,123,.4); }
-.shift-Rest .hero-card    { box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 12px 28px rgba(0,0,0,.45), 0 14px 44px -14px rgba(67,160,71,.35); }
-.shift-Home .hero-card    { box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 12px 28px rgba(0,0,0,.45), 0 14px 44px -14px rgba(3,155,229,.35); }
-.shift-Leave .hero-card   { box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 12px 28px rgba(0,0,0,.45), 0 14px 44px -14px rgba(171,71,188,.45); }
+.shift-Rest .hero-card { box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 12px 28px rgba(0,0,0,.45), 0 14px 44px -14px rgba(67,160,71,.35); }
+.shift-Home .hero-card { box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 12px 28px rgba(0,0,0,.45), 0 14px 44px -14px rgba(3,155,229,.35); }
+.shift-Leave .hero-card { box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 12px 28px rgba(0,0,0,.45), 0 14px 44px -14px rgba(171,71,188,.45); }
 .shift-Leave .hero-color-bar { background:#ab47bc; }
 
 .hero-label { display:flex; align-items:center; gap:8px; }
@@ -681,21 +656,15 @@ body {
   transition: background .4s, color .4s;
 }
 .hero-icon svg { animation: iconFloat 4s ease-in-out infinite; }
-.shift-Night .hero-icon   { color:#6d82ff; background:rgba(61,90,254,.16); }
-.shift-Day .hero-icon     { color:#ffa726; background:rgba(255,143,0,.16); }
+.shift-Night .hero-icon { color:#6d82ff; background:rgba(61,90,254,.16); }
+.shift-Day .hero-icon { color:#ffa726; background:rgba(255,143,0,.16); }
 .shift-Standby .hero-icon { color:#26a69a; background:rgba(0,137,123,.18); }
-.shift-Rest .hero-icon    { color:#66bb6a; background:rgba(67,160,71,.16); }
-.shift-Home .hero-icon    { color:#29b6f6; background:rgba(3,155,229,.16); }
-.shift-Leave .hero-icon   { color:var(--leave-soft); background:var(--shift-leave-bg); }
+.shift-Rest .hero-icon { color:#66bb6a; background:rgba(67,160,71,.16); }
+.shift-Home .hero-icon { color:#29b6f6; background:rgba(3,155,229,.16); }
+.shift-Leave .hero-icon { color:var(--leave-soft); background:var(--shift-leave-bg); }
 
 /* Weather icons */
-.weather-widget { z-index:2; }
-.weather-widget.loaded { animation: fadeIn .45s ease; }
-.weather-icon { display:inline-flex; line-height:1; }
-.weather-humidity { display:flex; align-items:center; justify-content:flex-end; gap:4px; }
-.weather-wind { justify-content:flex-end; }
-.weather-humidity .ico { color:#4fc3f7; }
-.wind-arrow { display:inline-flex; color:#80cbc4; }
+
 .w-sun { color:#ffb300; } .w-moon { color:#9fa8da; } .w-partly { color:#ffca28; }
 .w-cloud { color:#b0bec5; } .w-rain { color:#4fc3f7; } .w-storm { color:#ffca28; } .w-fog { color:#90a4ae; }
 
@@ -703,7 +672,7 @@ body {
 .tabs { box-shadow: inset 0 1px 3px rgba(0,0,0,.4), 0 1px 0 rgba(255,255,255,.03); }
 .tab { transition: background .25s, color .25s, box-shadow .25s; }
 .tab.active { box-shadow: 0 2px 8px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.06); }
-.week-view.active, .month-view.active, .search-view.active, .port-view.active { animation: viewIn .32s ease backwards; }
+.week-view.active, .month-view.active, .search-view.active { animation: viewIn .32s ease backwards; }
 
 /* Week cards */
 .day-card {
@@ -724,7 +693,7 @@ body {
   box-shadow: inset 0 1px 0 rgba(255,255,255,.04), 0 6px 16px rgba(0,0,0,.4), 0 20px 40px -24px rgba(0,0,0,.6);
 }
 .cal-grid.anim-in .cal-cell { animation: cellIn .3s ease backwards; animation-delay: calc(var(--i, 0) * 8ms); }
-.cal-grid.anim-left  { animation: slideL .3s cubic-bezier(.2,.8,.2,1); }
+.cal-grid.anim-left { animation: slideL .3s cubic-bezier(.2,.8,.2,1); }
 .cal-grid.anim-right { animation: slideR .3s cubic-bezier(.2,.8,.2,1); }
 .cal-cell { transition: background .2s; }
 .cal-wrap.leave-mode .cal-cell.is-leave {
@@ -733,13 +702,12 @@ body {
 }
 .cal-wrap.leave-mode .cal-cell.is-leave .cal-shift-label { color:#f3e5f5 !important; }
 .cal-cell.is-leave .cal-shift-label { color:#ce93d8 !important; font-weight:700; }
-.legend-lv { font-size:9px; font-weight:700; letter-spacing:.04em; color:#ce93d8; }
+
 .cal-wrap.leave-mode .cal-cell.is-leave-free { outline: 1.5px dashed rgba(186,104,200,.6); outline-offset:-4px; }
 .cal-cell.just-toggled { animation: popIn .3s cubic-bezier(.3,1.6,.5,1); }
 .cal-wrap.leave-mode { box-shadow: 0 0 0 1.5px rgba(186,104,200,.55), 0 12px 32px -10px rgba(171,71,188,.45); }
 .cal-wrap.leave-mode .cal-cell:not(.cal-cell-empty) { cursor:pointer; -webkit-tap-highlight-color:transparent; }
 .cal-wrap.leave-mode .cal-cell:not(.cal-cell-empty):active { transform: scale(.94); }
-.legend-leave { background:#ce93d8; }
 
 /* Leave planner */
 .leave-bar { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px; min-height:34px; }
@@ -759,21 +727,7 @@ body {
   margin:18px 2px 8px;
 }
 .section-title > span { display:inline-flex; align-items:center; gap:6px; }
-.text-btn { background:none; border:none; color:var(--leave-soft); font: 500 11px 'Roboto', sans-serif; letter-spacing:.06em; text-transform:uppercase; cursor:pointer; padding:4px 2px; }
-.leave-card {
-  background: linear-gradient(180deg, rgba(171,71,188,.09), rgba(171,71,188,0) 70%), var(--ha-card-bg);
-  border:1px solid rgba(186,104,200,.22); border-radius:12px; overflow:hidden;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.04), 0 6px 16px rgba(0,0,0,.4);
-  animation: riseIn .4s ease backwards;
-}
-.leave-stats { display:grid; grid-template-columns:1fr 1fr; }
-.ls { padding:14px 16px; }
-.ls:first-child { border-right:1px solid var(--ha-divider); }
-.ls-val { font-family:'Roboto Mono', monospace; font-size:24px; color:#e1bee7; line-height:1; }
-.ls-lbl { font-size:10px; letter-spacing:.06em; text-transform:uppercase; color:var(--ha-text-secondary); margin-top:6px; }
-.leave-range { display:flex; justify-content:space-between; align-items:center; gap:10px; padding:11px 16px; border-top:1px solid var(--ha-divider); }
-.lr-dates { font-size:13px; color:var(--ha-text-primary); }
-.lr-meta { font-size:11px; color:var(--leave-soft); font-family:'Roboto Mono', monospace; white-space:nowrap; }
+
 .leave-empty { font-size:12px; line-height:1.55; color:var(--ha-text-secondary); padding:14px 16px; background:var(--ha-card-bg); border:1px dashed rgba(186,104,200,.3); border-radius:12px; }
 .leave-empty b { color:var(--leave-soft); font-weight:500; }
 
@@ -781,8 +735,6 @@ body {
 .ph-card { box-shadow: inset 0 1px 0 rgba(255,255,255,.04), 0 4px 12px rgba(0,0,0,.35); animation: riseIn .4s ease backwards; }
 .ph-shift-chip { display:inline-flex; align-items:center; gap:4px; }
 .ph-hours-val.leave { color:var(--leave-soft); font-size:16px; }
-
-
 
 /* Hero weather badge */
 .weather-badge { flex-shrink:0; display:flex; flex-direction:column; align-items:flex-end; gap:5px; padding-top:2px; position:relative; z-index:2; }
@@ -795,26 +747,9 @@ body {
 .wb-row .wb-arrow { color:#80cbc4; display:inline-flex; transition: transform .6s ease; }
 .weather-badge.loaded { animation: fadeIn .45s ease; }
 
-/* Port tab: live vessel map */
-.port-map-card {
-  border-radius:12px; overflow:hidden; border:1px solid rgba(79,195,247,.18);
-  background: linear-gradient(180deg, rgba(79,195,247,.06), rgba(79,195,247,0)), var(--ha-card-bg);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 6px 16px rgba(0,0,0,.4), 0 18px 40px -20px rgba(3,169,244,.35);
-  animation: riseIn .4s ease backwards;
-}
-.port-map-head { display:flex; align-items:center; gap:10px; padding:14px 16px 12px; }
-.port-map-head .pm-icon { width:32px; height:32px; border-radius:9px; display:flex; align-items:center; justify-content:center; color:#4fc3f7; background:rgba(79,195,247,.14); }
-.port-map-wrap { position:relative; height:62vh; min-height:360px; max-height:620px; background:#0d1b26; border-top:1px solid var(--ha-divider); }
-.port-map-wrap { overflow:hidden; }
 /* MarineTraffic's own bottom bar (site name + iOS/Android links) is pushed out of view */
-.port-map-wrap iframe { position:absolute; top:0; left:0; width:100%; height:calc(100% + 38px); border:0; }
-.port-map-loading { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:12px; color:var(--ha-text-secondary); pointer-events:none; animation: tick 1.6s ease-in-out infinite; }
-.port-map-loading.hide { display:none; }
-/* Locked map: a clear layer on top stops dragging and zooming */
-.port-map-lock { position:absolute; inset:0; z-index:2; cursor:default; -webkit-tap-highlight-color:transparent; }
-.port-cta.nudge { animation: ctaNudge .6s cubic-bezier(.3,1.6,.5,1); }
-@keyframes ctaNudge { 0%,100% { transform:scale(1); } 40% { transform:scale(1.05); box-shadow:0 6px 22px -2px rgba(3,169,244,.7); } }
 
+/* Locked map: a clear layer on top stops dragging and zooming */
 
 /* Header: option B */
 .header { padding:6px 4px 18px; }
@@ -853,8 +788,6 @@ body {
 .ts-btn:active { transform:scale(.94); }
 
 /* Leave card: rows only, purple fade across the card */
-.leave-card { background: linear-gradient(180deg, rgba(171,71,188,.14), rgba(171,71,188,.02) 100%), var(--ha-card-bg); }
-.leave-card .leave-range:first-child { border-top:none; }
 
 /* Leave edit mode: clear button + hint */
 .leave-bar { margin-bottom:8px; justify-content:center; gap:10px; }
@@ -876,10 +809,6 @@ body {
 .cal-dow-row { border-bottom-color: rgba(255,255,255,.13); }
 .cal-cell-Night   .cal-shift-label { color:#6d82ff; }
 .cal-cell-Standby .cal-shift-label { color:#26a69a; }
-
-/* Port header: text centred across the card, anchor kept on the left */
-.port-map-head { position:relative; justify-content:center; text-align:center; min-height:60px; }
-.port-map-head .pm-icon { position:absolute; left:16px; top:50%; margin-top:-16px; }
 
 /* Search date box: whole box opens the calendar, dark-mode picker, visible blue icon */
 .date-wrap { position:relative; margin-bottom:12px; }
@@ -908,7 +837,7 @@ body {
 /* Week view: Events / Notifications */
 .events-panel { margin-top:12px; }
 .ev-card .ph-card-body { flex-direction:column; align-items:stretch; gap:3px; }
-.ev-top { display:flex; align-items:flex-start; justify-content:space-between; gap:8px; }
+
 .ev-title { font-size:13px; font-weight:500; color:#e1e1e1; line-height:1.35; }
 .ev-chip { display:inline-block; padding:1px 6px; border-radius:20px; font-size:9px; font-weight:500; letter-spacing:.03em; vertical-align:2px; margin-left:4px; white-space:nowrap; }
 .ev-chip-date { background:rgba(255,255,255,.06); color:#c5c7cc; margin-left:0; margin-right:6px; }
@@ -921,10 +850,10 @@ body {
 .tab[data-tab="week"].has-ev-dot::after { content:''; position:absolute; top:5px; right:10px; width:6px; height:6px; border-radius:50%; background:#FF5252; }
 
 /* Events marked on the calendars */
-.day-card .ph-card-dot { display:none; }   /* week cards use the holiday icon instead */
+   /* week cards use the holiday icon instead */
 .ev-day-mark { display:flex; align-items:center; justify-content:center; gap:3px; margin-top:7px; }
 .ev-day-ic { width:22px; height:22px; border-radius:7px; display:flex; align-items:center; justify-content:center; }
-.ev-day-more { font-size:9px; font-weight:500; color:#9da0a8; }
+
 /* Month: event dots sit top-right like the holiday dot, stacked below it on a holiday */
 .ev-cell-dots { position:absolute; top:3px; right:3px; display:flex; flex-direction:column; gap:2px; pointer-events:none; }
 .cal-cell.is-ph .ev-cell-dots { top:10px; }
@@ -952,53 +881,6 @@ body {
 
 /* Port tab opens MarineTraffic directly */
 a.tab-link { display:block; text-decoration:none; }
-
-/* Port tab */
-.port-view { display:none; }
-.port-view.active { display:block; }
-.port-hero {
-  position:relative; overflow:hidden; border-radius:12px; padding:18px 18px 16px;
-  border:1px solid rgba(79,195,247,.18);
-  background: radial-gradient(circle at 88% 0%, rgba(79,195,247,.16), transparent 60%), linear-gradient(180deg, rgba(79,195,247,.06), rgba(79,195,247,0)), var(--ha-card-bg);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 6px 16px rgba(0,0,0,.4), 0 18px 40px -20px rgba(3,169,244,.35);
-  animation: riseIn .4s ease backwards;
-}
-.port-hero-top { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
-.port-title { font-size:16px; font-weight:500; color:var(--ha-text-primary); }
-.port-sub { font-size:11px; color:var(--ha-text-secondary); margin-top:2px; }
-.port-hero-icon { display:inline-flex; filter: drop-shadow(0 4px 10px rgba(0,0,0,.45)); }
-.port-hero-icon svg { animation: iconFloat 5s ease-in-out infinite; }
-.port-temp-row { display:flex; align-items:baseline; gap:10px; margin-top:4px; }
-.port-temp { font-size:48px; font-weight:300; line-height:1; color:var(--ha-text-primary); }
-.port-cond { font-size:14px; color:var(--ha-text-secondary); }
-.port-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
-.port-tile {
-  background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,0)), var(--ha-card-bg);
-  border:1px solid var(--ha-border); border-radius:12px; padding:12px 10px 11px; min-width:0;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.04), 0 4px 10px rgba(0,0,0,.35);
-  animation: riseIn .4s ease backwards;
-}
-.port-grid .port-tile:nth-child(2) { animation-delay:.05s; }
-.port-grid .port-tile:nth-child(3) { animation-delay:.1s; }
-.pt-icon { width:30px; height:30px; border-radius:9px; display:flex; align-items:center; justify-content:center; margin-bottom:10px; }
-.pt-icon .ico { transition: transform .6s ease; }
-.pt-rain  { color:#4fc3f7; background:rgba(79,195,247,.12); }
-.pt-wind  { color:#80cbc4; background:rgba(128,203,196,.12); }
-.pt-hum   { color:#64b5f6; background:rgba(100,181,246,.12); }
-.pt-sea   { color:#ffb74d; background:rgba(255,183,77,.12); }
-.pt-wave  { color:#4dd0e1; background:rgba(77,208,225,.12); }
-.pt-swell { color:#9fa8da; background:rgba(121,134,203,.15); }
-.pt-val { font-family:'Roboto Mono', monospace; font-size:14px; color:var(--ha-text-primary); line-height:1.2; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.pt-lbl { font-size:9.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--ha-text-secondary); margin-top:4px; }
-.port-cta {
-  display:flex; align-items:center; justify-content:center; gap:8px; margin-top:16px; padding:13px 16px;
-  border-radius:14px; background:rgba(79,195,247,.14); border:1px solid rgba(79,195,247,.4);
-  color:#4fc3f7; font-size:14px; font-weight:600; text-decoration:none;
-  box-shadow: 0 4px 14px -4px rgba(3,169,244,.4); transition: transform .15s, background .15s;
-}
-.port-cta:active { transform:scale(.98); background:rgba(79,195,247,.22); }
-.port-updated { font-size:10px; color:var(--ha-text-secondary); text-align:center; padding:10px 0 4px; }
-
 
 /* M1 weather icon matches the weather */
 .wb-icon svg { transform-origin:center; }
@@ -1029,7 +911,6 @@ a.tab-link { display:block; text-decoration:none; }
 .shift-Day .hero-icon svg { animation: mSpin 18s linear infinite; }
 @keyframes mRing { 0%,78%,100% { transform: rotate(0); } 81% { transform: rotate(-14deg); } 84% { transform: rotate(12deg); } 87% { transform: rotate(-10deg); } 90% { transform: rotate(7deg); } 93% { transform: rotate(-3deg); } }
 @keyframes mRock { 0%,100% { transform: rotate(-8deg); } 50% { transform: rotate(8deg); } }
-@keyframes mSpin { to { transform: rotate(360deg); } }
 
 /* M5 countdown digits slide in */
 #countdown.ticker { animation: none; }
@@ -1049,10 +930,6 @@ a.tab-link { display:block; text-decoration:none; }
   0%,100% { box-shadow: 0 0 0 1px rgba(3,169,244,.25), 0 10px 26px -10px rgba(3,169,244,.45); }
   50% { box-shadow: 0 0 0 1px rgba(3,169,244,.5), 0 10px 30px -6px rgba(3,169,244,.75); }
 }
-
-/* M9 port anchor bobs */
-.pm-icon svg { animation: mBob 3.2s ease-in-out infinite; transform-origin: 50% 20%; }
-@keyframes mBob { 0%,100% { transform: translateY(0) rotate(-5deg); } 50% { transform: translateY(2px) rotate(5deg); } }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation:none !important; transition:none !important; }
@@ -1145,7 +1022,6 @@ a.tab-link { display:block; text-decoration:none; }
 
   <div class="week-view active" id="weekView">
     <div class="week-scroll" id="weekScroll"></div>
-    <div class="ph-panel" id="phPanel" style="display:none"></div>
     <div class="events-panel" id="eventsPanel" style="display:none"></div>
   </div>
 
@@ -1178,7 +1054,8 @@ a.tab-link { display:block; text-decoration:none; }
       <div class="legend-item"><div class="legend-dot" style="background:var(--shift-rest)"></div>Rest</div>
       
       <div class="legend-item"><div class="legend-dot" style="background:#FFC107"></div>Holiday</div>
-      <div class="legend-item"><span class="legend-lv">LEAVE</span></div>
+      <div class="legend-item"><div class="legend-dot" style="background:#c6e03a"></div>Events</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#ce93d8"></div>Leave</div>
     </div>
     <div id="leaveSummary"></div>
     <div id="monthHolidays"></div>
@@ -1258,15 +1135,6 @@ function saveTeam(t) {
     window.history.replaceState({}, '', url);
   } catch(e) {}
 }
-function removeTeam() {
-  try { localStorage.removeItem('liteTeam'); } catch(e) {}
-  try {
-    const url = new URL(window.location.href);
-    url.searchParams.delete('team');
-    window.history.replaceState({}, '', url);
-  } catch(e) {}
-}
-
 // ── Shift calc ──────────────────────────────────────────────
 function daysBetween(a,b) {
   return Math.round((Date.UTC(b.getFullYear(),b.getMonth(),b.getDate()) -
@@ -1346,7 +1214,6 @@ function confirmTeam() {
   updateHero();
   buildWeekView();
   buildMonthView();
-  buildPHPanel();
   buildEventsPanel();
   onDatePick(document.getElementById('datePicker').value);
   if (!harbourData.updatedAt) fetchHarbourWeather();
@@ -1488,7 +1355,6 @@ function buildWeekView() {
     card.dataset.key = dateKey(d);
     card.innerHTML = `
       <div class="day-card-top-bar"></div>
-      ${isPHDay ? '<div class="ph-card-dot"></div>' : ''}
       <div class="day-dow">${DAY_NAMES[d.getDay()]}</div>
       <div class="day-num">${d.getDate()}</div>
       <div class="day-shift-chip">${onLeave ? svgIcon('suitcase',10) + 'Leave' : shiftIcon(shift,10) + shift}</div>
@@ -1626,7 +1492,6 @@ function buildLeaveSummary() {
     return;
   }
   const fmt = d => `${DAY_NAMES[d.getDay()]} ${d.getDate()} ${MONTH_NAMES[d.getMonth()].slice(0,3)}`;
-  const plural = n => `${n} leave day${n===1?'':'s'}`;
   el.innerHTML = title + shown.map((b, i) => {
     const days = Math.round((b.end - b.start) / 864e5) + 1;
     return `<div class="ph-card lv-tile" style="animation-delay:${i*50}ms">
@@ -1896,38 +1761,6 @@ function calcPHHours(holidayDate) {
   return { hours, shift, chipColor };
 }
 
-function buildPHPanel() {
-  const panel = document.getElementById('phPanel');
-  if (!panel) return;
-  const holidays = getHolidaysInRange(today0(), 30);
-  if (holidays.length === 0) {
-    panel.innerHTML = '<div class="ph-empty">No public holidays in the next 30 days</div>';
-    return;
-  }
-  const DS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-  const MS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  panel.innerHTML = '<div class="ph-panel-title">🇿🇦 Public Holidays</div>' +
-    holidays.map(ph => {
-      const { hours, shift, chipColor } = calcPHHours(ph.date);
-      const dateStr = `${DS[ph.date.getDay()]} ${ph.date.getDate()} ${MS[ph.date.getMonth()]}`;
-      const obsTag  = ph.observed ? '<span class="ph-observed-tag">observed</span>' : '';
-      return `<div class="ph-card">
-        <div class="ph-card-accent"></div>
-        <div class="ph-card-body">
-          ${phTileIcon(ph.name)}
-          <div class="ph-card-left">
-            <div class="ph-card-name">${ph.name}${obsTag}</div>
-            <div class="ph-card-date">${dateStr} &nbsp;·&nbsp; <span class="ph-shift-chip" style="${chipColor}">${shiftIcon(shift,10)} ${shift}</span></div>
-          </div>
-          <div class="ph-card-right">
-            <div class="ph-hours-val${hours===0?' zero':''}">${hours}</div>
-            <div class="ph-hours-detail">hours</div>
-          </div>
-        </div>
-      </div>`;
-    }).join('');
-}
-
 // ── Harbour Weather ──────────────────────────────────────────
 const HARBOUR_AIR_LAT = -29.9122, HARBOUR_AIR_LON = 30.9756;   // Island View, Durban
 const HARBOUR_SEA_LAT = -29.8567, HARBOUR_SEA_LON = 31.0600;   // Durban Golden Mile, open coast
@@ -2032,7 +1865,7 @@ async function fetchHarbourWeather() {
 // ── Events / Notifications (events.json, posted by Omuhle) ────
 const EVENTS_STALE_MS = 10 * 60 * 1000;
 const EVENTS_MAX = 8;
-const EVENT_ACCENT = { urgent:'#FF5252', important:'#FFC107', info:'#4fc3f7' };
+const EVENT_ACCENT = { urgent:'#FF5252' };
 let eventsCache = null;          // parsed events.json, or null if not loaded
 let eventsFetchedAt = 0;
 // ?events=<url> override for testing — same site only, so outside files can't pose as notices
@@ -2104,13 +1937,8 @@ function evCategory(ev) {
   return EVENT_ICONS[k] ? k : 'notice';
 }
 // Strip + icon colour comes from the type of event; priority "urgent" overrides it with red
-const EVENT_GROUP_COLOUR = {
-  sport:'#f06292', social:'#f06292', yearend:'#f06292', celebration:'#f06292',      // social & sport
-  safety:'#FF5252', wellness:'#FF5252',                                              // health & safety
-  union:'#e1e1e1',                                                                   // union (white: yellow is the holiday dot)
-  work:'#4fc3f7', roadshow:'#4fc3f7', training:'#4fc3f7', longservice:'#4fc3f7', notice:'#4fc3f7'   // company
-};
-function evColour(ev) { return ev.priority === 'urgent' ? EVENT_ACCENT.urgent : EVENT_GROUP_COLOUR[evCategory(ev)]; }
+const EVENT_COLOUR = '#c6e03a';   // every event is lime (company colour); red is kept for urgent
+function evColour(ev) { return ev.priority === 'urgent' ? EVENT_ACCENT.urgent : EVENT_COLOUR; }
 // Dated events for this team, by day (no 30-day limit, so the Month view can show further ahead)
 // Icon per South African public holiday (yellow, like the holiday dot)
 const HOLIDAY_ICONS = {
@@ -2193,7 +2021,7 @@ function paintEventMarks() {
   document.querySelectorAll('#calGrid .cal-cell[data-key]').forEach(cell => {
     cell.querySelectorAll('.ev-cell-dots').forEach(n => n.remove());
     const list = byDay[cell.dataset.key] || [];
-    const cols = [...new Set(list.map(evColour))].slice(0, 3);   // one dot per colour
+    const cols = list.length ? [EVENT_COLOUR] : [];   // month view: one pink dot for events
     if (!cols.length) return;
     cell.insertAdjacentHTML('beforeend', `<div class="ev-cell-dots">${cols.map(c => `<i style="background:${c}"></i>`).join('')}</div>`);
   });
@@ -2214,7 +2042,7 @@ function evTeams(ev) {
 }
 function visibleEvents() {
   if (!eventsCache || !Array.isArray(eventsCache.events) || !selectedTeam) return [];
-  const today = dateKey(today0()), until = dateKey(addDays(today0(), 30));
+  const today = dateKey(today0()), until = dateKey(addDays(today0(), 14));
   const list = eventsCache.events.filter(ev => {
     if (!ev || typeof ev !== 'object') return false;
     if (!String(ev.title || '').trim() && !String(ev.body || '').trim()) return false;   // skip blank entries
@@ -2297,6 +2125,13 @@ function buildEventsPanel() {
   // Red dot on the Week tab when there's anything urgent or new for this team
   if (weekTab) weekTab.classList.toggle('has-ev-dot', list.some(evNeedsAttention));
 }
+// Last downloaded events.json, kept on this phone so Coming up appears instantly (and without signal)
+const EVENTS_SAVED_KEY = 'liteEventsSaved';
+const EVENTS_SAVE_OK = EVENTS_URL === 'events.json';   // never save a ?events= test file
+function loadSavedEvents() {
+  if (!EVENTS_SAVE_OK) return;
+  try { const d = JSON.parse(localStorage.getItem(EVENTS_SAVED_KEY) || 'null'); if (d && Array.isArray(d.events)) eventsCache = d; } catch (e) {}
+}
 async function loadEvents() {
   eventsFetchedAt = Date.now();
   try {
@@ -2307,13 +2142,14 @@ async function loadEvents() {
     const data = await res.json();
     if (!data || typeof data !== 'object' || !Array.isArray(data.events)) throw new Error('unexpected format');
     eventsCache = data;
+    if (EVENTS_SAVE_OK) { try { localStorage.setItem(EVENTS_SAVED_KEY, JSON.stringify(data)); } catch (e) {} }
     const live = new Set(data.events.filter(ev => ev && typeof ev === 'object').map(evKey));
     const before = eventsRead.size;
     eventsRead.forEach(k => { if (!live.has(k)) eventsRead.delete(k); });
     if (eventsRead.size !== before) saveEventsRead();
   } catch (e) {
     console.warn('Events not loaded:', e && e.message ? e.message : e);
-    eventsCache = null;
+    if (!eventsCache) eventsCache = null;   // keep showing the saved copy if there is one
   }
   buildEventsPanel();
   paintEventMarks();
@@ -2328,7 +2164,6 @@ if (saved) {
   applyTeam();
   updateHero();
   buildWeekView();
-  buildPHPanel();
   buildEventsPanel();
 
   let harbourCached = null;
@@ -2345,7 +2180,8 @@ if (saved) {
 } else {
   document.getElementById('app').style.display = 'none';
 }
-loadEvents();
+loadSavedEvents(); buildEventsPanel(); paintEventMarks();   // instant, from the saved copy
+loadEvents();                                              // then refresh from GitHub
 
 setInterval(()=>{
   setCountdown(fmtCountdown(nextChange(new Date())-new Date()));
@@ -2376,7 +2212,6 @@ function switchTeam(team) {
     lastHeroTheme = null;
     updateHero();
     buildWeekView();
-    buildPHPanel();
     buildEventsPanel();
     buildMonthView(true);
     onDatePick(document.getElementById('datePicker').value);
