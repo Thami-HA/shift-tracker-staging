@@ -498,6 +498,8 @@ body {
   color: var(--ha-text-secondary);
 }
 .legend-dot { width: 6px; height: 6px; border-radius: 50%; }
+/* Month calendar: browser keeps vertical scrolling, sideways swipes change month */
+#calWrap { touch-action: pan-y; }
 
 /* ── Search ───────────────────────────────────────────────── */
 .search-label {
@@ -1619,6 +1621,30 @@ function buildMonthView(noAnim) {
   renderLeaveModeUI();
   buildMonthHolidays();
 }
+
+// Swipe the calendar sideways to change month. Only a clear, mostly-sideways swipe counts,
+// so vertical scrolling and taps (leave planning) work as before.
+(function calendarSwipe() {
+  const wrap = document.getElementById('calWrap');
+  if (!wrap) return;
+  let x0 = null, y0 = 0, t0 = 0, swipedAt = 0;
+  wrap.addEventListener('touchstart', e => {
+    if (e.touches.length !== 1) { x0 = null; return; }
+    x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; t0 = Date.now();
+  }, { passive: true });
+  wrap.addEventListener('touchend', e => {
+    if (x0 === null) return;
+    const t = e.changedTouches[0], dx = t.clientX - x0, dy = t.clientY - y0;
+    x0 = null;
+    if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy) * 1.5 || Date.now() - t0 > 800) return;
+    swipedAt = Date.now();
+    changeMonth(dx < 0 ? 1 : -1);
+    if (navigator.vibrate) navigator.vibrate(6);
+  }, { passive: true });
+  wrap.addEventListener('touchcancel', () => { x0 = null; }, { passive: true });
+  // A swipe must never also count as a tap on a day
+  wrap.addEventListener('click', e => { if (Date.now() - swipedAt < 400) { e.stopPropagation(); e.preventDefault(); } }, true);
+})();
 
 function changeMonth(dir) {
   viewMonth = new Date(viewMonth.getFullYear(),viewMonth.getMonth()+dir,1);
