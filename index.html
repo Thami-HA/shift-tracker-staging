@@ -1496,15 +1496,17 @@ function buildLeaveSummary() {
     return;
   }
   const fmt = d => `${DAY_NAMES[d.getDay()]} ${d.getDate()} ${MONTH_NAMES[d.getMonth()].slice(0,3)}`;
+  const today = today0();
   el.innerHTML = title + shown.map((b, i) => {
-    return `<div class="ph-card lv-tile" style="animation-delay:${i*50}ms">
-      <div class="ph-card-accent" style="background:#ab47bc"></div>
+    const done = b.end < today;   // whole break is in the past: plain default tile
+    return `<div class="ph-card lv-tile${done ? ' lv-done' : ''}" style="animation-delay:${i*50}ms">
+      <div class="ph-card-accent" style="background:${done ? 'rgba(255,255,255,.12)' : '#ab47bc'}"></div>
       <div class="ph-card-body">
-        <div class="ph-ic" style="background:#ab47bc26;color:#ce93d8">${svgIcon('suitcase', 17)}</div>
+        <div class="ph-ic" style="${done ? 'background:rgba(255,255,255,.06);color:#9da0a8' : 'background:#ab47bc26;color:#ce93d8'}">${svgIcon('suitcase', 17)}</div>
         <div class="ph-card-left">
           <div class="ph-card-name">${b.start.getTime()===b.end.getTime() ? fmt(b.start) : fmt(b.start) + ' – ' + fmt(b.end)}</div>
         </div>
-        <div class="ph-card-right"><div class="ph-hours-val" style="color:#ce93d8">${b.used}</div><div class="ph-hours-detail">leave day${b.used===1?'':'s'}</div></div>
+        <div class="ph-card-right"><div class="ph-hours-val"${done ? '' : ' style="color:#ce93d8"'}>${b.used}</div><div class="ph-hours-detail">${done ? 'day' + (b.used===1?'':'s') + ' taken' : 'leave day' + (b.used===1?'':'s')}</div></div>
       </div>
     </div>`;
   }).join('');
