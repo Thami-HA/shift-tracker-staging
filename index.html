@@ -483,16 +483,18 @@ body {
 
 .legend {
   display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
+  gap: 6px;
+  flex-wrap: nowrap;
+  justify-content: space-between;
   margin-top: 10px;
   padding: 0 2px;
 }
 .legend-item {
   display: flex;
   align-items: center;
-  gap: 5px;
-  font-size: 10px;
+  gap: 4px;
+  white-space: nowrap;
+  font-size: clamp(9px, 2.6vw, 10px);
   color: var(--ha-text-secondary);
 }
 .legend-dot { width: 6px; height: 6px; border-radius: 50%; }
@@ -1493,14 +1495,12 @@ function buildLeaveSummary() {
   }
   const fmt = d => `${DAY_NAMES[d.getDay()]} ${d.getDate()} ${MONTH_NAMES[d.getMonth()].slice(0,3)}`;
   el.innerHTML = title + shown.map((b, i) => {
-    const days = Math.round((b.end - b.start) / 864e5) + 1;
     return `<div class="ph-card lv-tile" style="animation-delay:${i*50}ms">
       <div class="ph-card-accent" style="background:#ab47bc"></div>
       <div class="ph-card-body">
         <div class="ph-ic" style="background:#ab47bc26;color:#ce93d8">${svgIcon('suitcase', 17)}</div>
         <div class="ph-card-left">
           <div class="ph-card-name">${b.start.getTime()===b.end.getTime() ? fmt(b.start) : fmt(b.start) + ' – ' + fmt(b.end)}</div>
-          <div class="ph-card-date">${days} day${days===1?'':'s'} away from work</div>
         </div>
         <div class="ph-card-right"><div class="ph-hours-val" style="color:#ce93d8">${b.used}</div><div class="ph-hours-detail">leave day${b.used===1?'':'s'}</div></div>
       </div>
