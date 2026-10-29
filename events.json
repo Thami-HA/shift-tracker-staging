@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "updated": "2026-10-16T04:22:22+02:00",
+  "updated": "2026-10-29T17:20:47+02:00",
   "events": [
     {
       "id": "evt-20261015-124913",
@@ -51,6 +51,17 @@
       "expires": "2026-10-11",
       "created": "2026-10-10T09:00:00+02:00",
       "posted_by": "Omuhle"
+    },
+    {
+      "id": "evt-20261029-172047",
+      "title": "BTT Children's Bursary 2027 — now open",
+      "body": "Applications close 08 Feb 2027 · grades 7–12 + first tertiary qualifications (new: grades 7–9) · up to R30 000/yr school, R90 000/yr tertiary · For more details contact your supervisor",
+      "teams": "all",
+      "priority": "info",
+      "expires": "2027-02-09",
+      "created": "2026-10-29T17:20:47+02:00",
+      "posted_by": "Omuhle",
+      "category": "bursary"
     }
   ]
 }
