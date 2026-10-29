@@ -62,6 +62,8 @@ body {
   align-items: center;
   justify-content: center;
   padding: 32px 24px;
+  padding-top: max(32px, env(safe-area-inset-top, 0px));
+  padding-bottom: max(32px, env(safe-area-inset-bottom, 0px));
   animation: fadeIn 0.3s ease;
 }
 .onboarding.hidden { display: none; }
@@ -145,6 +147,11 @@ body {
   max-width: 430px;
   margin: 0 auto;
   padding: 16px 14px 48px;
+  /* iPhones with a notch / Dynamic Island report safe areas; other phones report 0, so nothing changes there */
+  padding-top: max(16px, calc(env(safe-area-inset-top, 0px) - 18px));
+  padding-left: max(14px, env(safe-area-inset-left, 0px));
+  padding-right: max(14px, env(safe-area-inset-right, 0px));
+  padding-bottom: max(48px, calc(env(safe-area-inset-bottom, 0px) + 24px));
 }
 
 /* ── Header ───────────────────────────────────────────────── */
@@ -1021,7 +1028,7 @@ a.tab-link { display:block; text-decoration:none; }
     <button class="tab active" data-tab="week" onclick="switchTab('week')">Week</button>
     <button class="tab" data-tab="month" onclick="switchTab('month')">Month</button>
     <button class="tab" data-tab="search" onclick="switchTab('search')">Search</button>
-    <a class="tab tab-link" href="https://www.marinetraffic.com/en/ais/home/centerx:31.032/centery:-29.890/zoom:13" target="_blank" rel="noopener">Port</a>
+    <a class="tab tab-link" href="https://www.marinetraffic.com/en/ais/home/centerx:31.032/centery:-29.890/zoom:13/shownames:true/vtypes:8" target="_blank" rel="noopener">Port</a>
   </div>
 
   <div class="week-view active" id="weekView">
@@ -1954,11 +1961,13 @@ const EVENT_ICONS = {
   roadshow:'<rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M12 16v4M8 20h8M7 12l3-3 2 2 4-4"/>',
   wellness:'<path d="M4 4v6a5 5 0 0 0 10 0V4M4 4h2M12 4h2M9 15v1a5 5 0 0 0 10 0v-3"/><circle cx="19" cy="11" r="2"/>',
   yearend:'<path d="M4 21l5-14 8 8z"/><path d="M14 3c0 2 1 3 3 3M19 8h2M16 2v2M21 13c-2-1-4 0-4 0M12 6c1-1 1-2 0-3"/>',
-  longservice:'<rect x="3" y="4" width="18" height="13" rx="1.5"/><path d="M7 8h10M7 11h6"/><circle cx="16" cy="15" r="2.5"/><path d="M14.8 17.2L14 21l2-1 2 1-.8-3.8"/>'
+  longservice:'<rect x="3" y="4" width="18" height="13" rx="1.5"/><path d="M7 8h10M7 11h6"/><circle cx="16" cy="15" r="2.5"/><path d="M14.8 17.2L14 21l2-1 2 1-.8-3.8"/>',
+  bursary:'<path d="M3 6l9-4 9 4-9 4z"/><path d="M7 8v3c3 1.5 7 1.5 10 0V8"/><path d="M3 15h7a2 2 0 0 1 2 2 2 2 0 0 1 2-2h7v6h-7a2 2 0 0 0-2 2 2 2 0 0 0-2-2H3z"/>'
 };
 // Spaces, dashes and underscores are ignored, so "year-end", "year_end" and "Year End" all match yearend
 const EVENT_ICON_ALIASES = { sports:'sport', braai:'social', party:'celebration', meeting:'union', unionmeeting:'union', notices:'notice', announcement:'notice',
-  wellnessday:'wellness', yearendparty:'yearend', endofyear:'yearend', longserviceaward:'longservice', longserviceawards:'longservice' };
+  wellnessday:'wellness', yearendparty:'yearend', endofyear:'yearend', longserviceaward:'longservice', longserviceawards:'longservice',
+  bursaries:'bursary', bursaryscheme:'bursary', scholarship:'bursary' };
 function evCategory(ev) {
   const c = String(ev.category || '').trim().toLowerCase().replace(/[\s_-]+/g, '');
   const k = EVENT_ICON_ALIASES[c] || c;
@@ -2276,7 +2285,7 @@ function installApp() {
 }
 </script>
 
-<div id="installBanner" style="display:none;position:fixed;bottom:0;left:0;right:0;max-width:430px;margin:0 auto;background:#1c1c1e;border-top:1px solid rgba(255,255,255,0.08);padding:12px 16px 28px;align-items:center;justify-content:space-between;z-index:300;">
+<div id="installBanner" style="display:none;position:fixed;bottom:0;left:0;right:0;max-width:430px;margin:0 auto;background:#1c1c1e;border-top:1px solid rgba(255,255,255,0.08);padding:12px 16px max(28px, calc(env(safe-area-inset-bottom, 0px) + 12px));align-items:center;justify-content:space-between;z-index:300;">
   <div>
     <div style="font-size:13px;font-weight:500;color:#e1e1e1;">&#x26F4;&#xFE0F; Install Shift Tracker</div>
     <div style="font-size:11px;color:#9da0a8;margin-top:2px;">Add to home screen for the full app experience</div>
