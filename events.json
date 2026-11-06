@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "updated": "2026-11-06T22:00:46+02:00",
+  "updated": "2026-11-06T22:24:59+02:00",
   "events": [
     {
       "id": "evt-20261106-220001",
@@ -14,8 +14,9 @@
       "expires": "2026-12-05",
       "created": "2026-11-06T22:00:46+02:00",
       "posted_by": "Omuhle",
-      "category": "notice",
-      "mark": "2026-11-12"
+      "category": "survey",
+      "mark": "2026-11-12",
+      "updated": "2026-11-06T22:24:59+02:00"
     },
     {
       "id": "evt-20261106-220002",
@@ -29,8 +30,9 @@
       "expires": "2026-12-05",
       "created": "2026-11-06T22:00:46+02:00",
       "posted_by": "Omuhle",
-      "category": "notice",
-      "mark": "2026-11-13"
+      "category": "survey",
+      "mark": "2026-11-13",
+      "updated": "2026-11-06T22:24:59+02:00"
     },
     {
       "id": "evt-20261106-220003",
@@ -44,8 +46,9 @@
       "expires": "2026-12-05",
       "created": "2026-11-06T22:00:46+02:00",
       "posted_by": "Omuhle",
-      "category": "notice",
-      "mark": "2026-11-17"
+      "category": "survey",
+      "mark": "2026-11-17",
+      "updated": "2026-11-06T22:24:59+02:00"
     },
     {
       "id": "evt-20261106-220004",
@@ -59,8 +62,9 @@
       "expires": "2026-12-05",
       "created": "2026-11-06T22:00:46+02:00",
       "posted_by": "Omuhle",
-      "category": "notice",
-      "mark": "2026-11-18"
+      "category": "survey",
+      "mark": "2026-11-18",
+      "updated": "2026-11-06T22:24:59+02:00"
     },
     {
       "id": "evt-20261015-124913",
