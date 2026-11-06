@@ -2025,6 +2025,11 @@ function dayIcon(paths, colour) {
   return `<div class="ev-day-ic" style="background:${colour}1f"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="${colour}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths}</svg></div>`;
 }
 
+function evMarkDates(ev) {
+  const raw = ev.mark != null && ev.mark !== '' ? ev.mark : ev.date;
+  const arr = Array.isArray(raw) ? raw : [raw];
+  return arr.map(evIsoDate).filter(Boolean);
+}
 function eventsByDay() {
   const map = {};
   if (!eventsCache || !Array.isArray(eventsCache.events) || !selectedTeam) return map;
@@ -2034,7 +2039,10 @@ function eventsByDay() {
     if (!String(ev.title || '').trim() && !String(ev.body || '').trim()) return;
     const date = evIsoDate(ev.date), exp = evIsoDate(ev.expires), teams = evTeams(ev);
     if (!date || date < today || (exp && today > exp) || (teams && !teams.includes(selectedTeam))) return;
-    (map[date] = map[date] || []).push(ev);
+    evMarkDates(ev).forEach(md => {
+      if (md < today) return;
+      (map[md] = map[md] || []).push(ev);
+    });
   });
   return map;
 }
